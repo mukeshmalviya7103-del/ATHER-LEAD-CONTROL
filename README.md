@@ -1,0 +1,940 @@
+# ATHER-LEAD-CONTROL
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ather EX Center - CRM Lead Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a; --panel:#141414; --panel2:#1c1c1c; --panel3:#232323;
+  --border:#2a2a2a; --border2:#333; --text:#f5f5f5; --muted:#8a8a8a; --muted2:#5a5a5a;
+  --green:#00ff88; --green-dim:rgba(0,255,136,0.12);
+  --red:#ff3b3b; --red-dim:rgba(255,59,59,0.12);
+  --yellow:#ffcc00; --yellow-dim:rgba(255,204,0,0.12);
+  --blue:#3b82f6; --ather:#00d084;
+}
+body[data-theme="light"]{
+  --bg:#f4f5f7; --panel:#ffffff; --panel2:#f1f2f4; --panel3:#e8e9ec;
+  --border:#e2e3e6; --border2:#d2d3d7; --text:#14151a; --muted:#6b6f76; --muted2:#9a9ea5;
+  --green-dim:rgba(0,160,90,0.12); --red-dim:rgba(255,59,59,0.10); --yellow-dim:rgba(200,140,0,0.14);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .2s,color .2s}
+.mono{font-family:'JetBrains Mono',monospace}
+/* Settings widgets */
+.theme-toggle{display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.theme-toggle button{border:none;background:var(--panel2);color:var(--muted);padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer}
+.theme-toggle button.active{background:var(--text);color:var(--bg)}
+.color-swatch{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);cursor:pointer;padding:0;overflow:hidden}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.tag-pill{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--border);padding:5px 10px;border-radius:20px;font-size:11px}
+.tag-pill button{border:none;background:transparent;color:var(--red);cursor:pointer;font-weight:700;padding:0;line-height:1}
+.variant-block{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:10px}
+
+/* Layout */
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.sidebar{background:var(--panel);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:20px 0;z-index:10}
+.main{padding:0;overflow:auto;background:var(--bg)}
+
+/* Sidebar */
+.logo{padding:0 20px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo-mark{width:36px;height:36px;background:var(--text);color:var(--bg);display:grid;place-items:center;border-radius:8px;font-weight:800;letter-spacing:-1px}
+.logo-text b{display:block;font-size:14px;line-height:1.1;letter-spacing:-0.3px}
+.logo-text span{font-size:11px;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase}
+.center-input-wrap{padding:12px 20px}
+.center-input{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:12px;outline:none}
+.center-input:focus{border-color:var(--green)}
+.nav{padding:8px 10px;flex:1}
+.nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;text-align:left;transition:.15s}
+.nav-item:hover{background:var(--panel2);color:var(--text)}
+.nav-item.active{background:var(--text);color:var(--bg)}
+.nav-item .dot{width:6px;height:6px;border-radius:50%;background:currentColor;margin-left:auto;opacity:0}
+.nav-item.active .dot{opacity:1}
+.sidebar-foot{padding:16px 20px;border-top:1px solid var(--border);margin-top:auto}
+.exec-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.exec-chip{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--border);padding:7px 10px;border-radius:20px;font-size:11px}
+.exec-chip .av{width:22px;height:22px;border-radius:50%;background:var(--panel3);display:grid;place-items:center;font-weight:700;font-size:10px}
+.exec-chip small{margin-left:auto;color:var(--muted)}
+
+/* Topbar */
+.topbar{height:64px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(10,10,10,0.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.search{width:320px;background:var(--panel);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:10px;padding:0 12px;height:40px}
+.search input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:13px}
+.search span{color:var(--muted2)}
+.top-actions{display:flex;align-items:center;gap:10px}
+.btn{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.15s}
+.btn:hover{background:var(--panel3);border-color:var(--border2)}
+.btn-primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn-primary:hover{background:#e5e5e5}
+.btn-green{background:var(--green);color:#000;border-color:var(--green);font-weight:700}
+.btn-green:hover{background:#00e67a}
+.btn-ghost{background:transparent}
+
+/* Views */
+.view{display:none;padding:24px;animation:fade .2s}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;position:relative;overflow:hidden}
+.stat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600}
+.stat-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:var(--panel2);border:1px solid var(--border)}
+.stat-value{font-size:28px;font-weight:700;letter-spacing:-1px;line-height:1}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:6px;display:flex;gap:6px;align-items:center}
+.chip{display:inline-flex;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.3px}
+.chip-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(0,255,136,0.2)}
+.chip-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,59,59,0.2)}
+.chip-yellow{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,204,0,0.2)}
+
+/* SLA Alert bar */
+.sla-bar{background:linear-gradient(90deg, var(--red-dim), transparent);border:1px solid rgba(255,59,59,0.2);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;font-size:13px}
+.sla-bar b{color:var(--red)}
+
+/* Panels */
+.grid-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.panel-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-head h3{font-size:13px;font-weight:700;letter-spacing:-0.2px}
+.panel-body{padding:0}
+.filters{padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);background:var(--panel2)}
+.select, .input-sm{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-size:12px;outline:none;min-width:120px}
+.select:focus, .input-sm:focus{border-color:var(--muted)}
+
+/* Table */
+.table-wrap{overflow:auto;max-height:520px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{position:sticky;top:0;background:var(--panel2);z-index:1;text-align:left;padding:10px 14px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,0.02)}
+.user-cell{display:flex;align-items:center;gap:10px}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--panel3);display:grid;place-items:center;font-weight:700;font-size:11px;border:1px solid var(--border)}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--panel2)}
+.status-dot{width:6px;height:6px;border-radius:50%}
+.s-New{background:#2a2a2a}
+.s-Contacted,.s-Connected{background:rgba(59,130,246,0.12);color:#60a5fa;border-color:rgba(59,130,246,0.2)}
+.s-Test\ Ride\ Scheduled,.s-Test\ Ride\ Done{background:rgba(255,204,0,0.12);color:var(--yellow);border-color:rgba(255,204,0,0.2)}
+.s-Booking\ Done,.s-Pre-Booking{background:rgba(0,255,136,0.12);color:var(--green);border-color:rgba(0,255,136,0.2)}
+.s-Delivery\ Done{background:#fff;color:#000}
+.s-Lost,.s-DND,.s-Duplicate{background:rgba(255,59,59,0.12);color:var(--red);border-color:rgba(255,59,59,0.2)}
+.lead-score{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800}
+.score-hot{background:var(--red);color:#fff}
+.score-warm{background:var(--yellow);color:#000}
+.score-cold{background:var(--panel3);color:var(--muted);border:1px solid var(--border)}
+
+/* Kanban */
+.kanban{display:grid;grid-template-columns:repeat(7, 280px);gap:14px;overflow:auto;padding-bottom:20px}
+.kanban-col{background:var(--panel);border:1px solid var(--border);border-radius:14px;min-height:400px;display:flex;flex-direction:column}
+.k-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--panel);border-radius:14px 14px 0 0;z-index:1}
+.k-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px}
+.k-count{background:var(--panel2);border:1px solid var(--border);padding:2px 7px;border-radius:20px;font-size:10px}
+.k-body{padding:10px;display:flex;flex-direction:column;gap:10px;flex:1;overflow:auto;min-height:300px}
+.k-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:grab;transition:.15s}
+.k-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.k-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.k-card-name{font-weight:600;font-size:13px}
+.k-card-meta{font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.k-card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.k-card-exec{font-size:10px;background:var(--panel3);border:1px solid var(--border);padding:3px 7px;border-radius:20px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;place-items:center;z-index:100;padding:20px}
+.modal-overlay.open{display:grid}
+.modal{width:560px;max-width:100%;background:var(--panel);border:1px solid var(--border2);border-radius:20px;overflow:hidden;animation:pop .2s}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-head{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-head h2{font-size:16px;font-weight:700}
+.modal-body{padding:20px 22px;display:grid;gap:14px;max-height:70vh;overflow:auto}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-field.full{grid-column:1 / -1}
+.form-field label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
+.form-input{height:42px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:0 12px;color:var(--text);font-size:13px;outline:none;width:100%}
+.form-input:focus{border-color:var(--text)}
+textarea.form-input{height:80px;padding:10px 12px;resize:none}
+.modal-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;background:var(--panel2)}
+
+/* Analytics */
+.analytics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+.chart-box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px}
+.chart-box h4{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px}
+.bar-label{width:90px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:8px;background:var(--panel2);border-radius:20px;overflow:hidden;border:1px solid var(--border)}
+.bar-fill{height:100%;background:var(--text);border-radius:20px}
+.bar-val{width:36px;text-align:right;font-weight:600}
+
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--text);margin-bottom:6px}
+
+/* Responsive */
+@media(max-width:1100px){.app{grid-template-columns:1fr}.sidebar{display:none}.stats{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}.analytics-grid{grid-template-columns:1fr}.search{width:180px}.kanban{grid-template-columns:repeat(7,260px)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">A</div>
+      <div class="logo-text"><b>ATHER</b><span id="logoCenter">EX Center • CRM</span></div>
+    </div>
+    <div class="center-input-wrap">
+      <input id="centerName" class="center-input" value="Ather Space - Udaipur" placeholder="Center Name">
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard"><span>⌖</span> Dashboard <span class="dot"></span></button>
+      <button class="nav-item" data-view="leads"><span>◍</span> Lead Control <span class="dot"></span></button>
+      <button class="nav-item" data-view="kanban"><span>⧉</span> Pipeline Kanban <span class="dot"></span></button>
+      <button class="nav-item" data-view="analytics"><span>◭</span> Analytics <span class="dot"></span></button>
+      <button class="nav-item" data-view="control"><span>▦</span> Control Rules <span class="dot"></span></button>
+      <button class="nav-item" data-view="reports"><span>▤</span> Reports <span class="dot"></span></button>
+      <button class="nav-item" data-view="settings"><span>⚙</span> Settings <span class="dot"></span></button>
+    </nav>
+    <div class="sidebar-foot">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700">Sales Team</div>
+      <div class="exec-list" id="execList"></div>
+      <button class="btn" style="width:100%;margin-top:12px;height:34px;font-size:11px" onclick="addExecutive()">+ Add Executive</button>
+      <div style="margin-top:16px;padding:10px;background:var(--panel2);border:1px solid var(--border);border-radius:10px">
+        <div style="font-size:10px;color:var(--muted)">LEAD CONTROL MODE</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <div style="width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 10px var(--green)"></div>
+          <span class="mono" style="font-size:11px;font-weight:700">AUTO ASSIGN • ROUND ROBIN</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px" id="rrInfo">Next: Rajesh</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="search"><span>⌕</span><input id="globalSearch" placeholder="Search name, phone, email..." oninput="renderLeads()"></div>
+        <div class="mono" style="font-size:11px;color:var(--muted)" id="todayDate"></div>
+      </div>
+      <div class="top-actions">
+        <select class="select mono" id="exportMonth" style="min-width:140px"><option value="">All Time</option></select>
+        <button class="btn btn-ghost" onclick="exportCSV()">⎙ Export</button>
+        <label class="btn btn-ghost" style="cursor:pointer">↥ Import <input type="file" id="importFile" accept=".csv" style="display:none" onchange="importCSV(event)"></label>
+        <button class="btn btn-primary" onclick="openModal()">+ New Lead</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div class="view active" id="view-dashboard">
+      <div class="sla-bar" id="slaBar">
+        <div>⚠️ <b id="slaCount">0</b> leads breaching SLA (Not contacted in 30 mins) • <span id="overdueCount">0</span> overdue follow-ups today</div>
+        <button class="btn" style="height:32px" onclick="switchView('leads'); document.getElementById('filterStatus').value='New'; renderLeads()">View Now</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-top"><span class="stat-label">Total Leads</span><span class="stat-icon">◍</span></div><div class="stat-value" id="statTotal">0</div><div class="stat-sub"><span class="chip chip-green" id="statTodayGrowth">+0 today</span><span id="statTotalSub">All time</span></div></div>
+        <div class="stat"><div class="stat-top"><span class="stat-label">Hot / Action Needed</span><span class="stat-icon" style="color:var(--red)">🔥</span></div><div class="stat-value" id="statHot">0</div><div class="stat-sub"><span>Test Ride pending:</span><b id="statTRPending" style="color:var(--text)">0</b></div></div>
+        <div class="stat"><div class="stat-top"><span class="stat-label">Conversion Rate</span><span class="stat-icon">↗</span></div><div class="stat-value"><span id="statConv">0</span><span style="font-size:16px;color:var(--muted)">%</span></div><div class="stat-sub"><span>Bookings:</span><b id="statBooking">0</b> • <span id="statBookingSub">from contacted</span></div></div>
+        <div class="stat"><div class="stat-top"><span class="stat-label">Avg Response Time</span><span class="stat-icon">◷</span></div><div class="stat-value" id="statAvgTime">0m</div><div class="stat-sub"><span class="chip" id="statSLAChip" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(0,255,136,0.2)">SLA: 30m</span><span>Target</span></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h3>Recent Leads • Lead Control Queue</h3><select class="select" id="quickFilter" onchange="renderLeads()"><option value="">All Status</option><option value="New">New Only (Unassigned Check)</option><option value="overdue">Overdue Follow-up</option><option value="sla">SLA Breach</option></select></div>
+          <div class="table-wrap" style="max-height:420px">
+            <table><thead><tr><th>Lead • Score</th><th>Contact</th><th>Model • Source</th><th>Exec • Age</th><th>Status • Next Action</th><th></th></tr></thead><tbody id="recentTable"></tbody></table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Today's Follow-ups • Control Center</h3><span class="chip chip-yellow mono" id="todayFollowCount">0 DUE</span></div>
+          <div style="max-height:420px;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px" id="followUpList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADS VIEW -->
+    <div class="view" id="view-leads">
+      <div class="panel">
+        <div class="panel-head"><h3>Lead Control Master • <span class="mono" id="leadCountLabel" style="color:var(--muted);font-weight:400">0 leads</span></h3><div style="display:flex;gap:8px"><button class="btn" style="height:32px" onclick="assignPending()">⚡ Auto-Assign New</button><button class="btn btn-primary" style="height:32px" onclick="openModal()">+ Add Lead</button></div></div>
+        <div class="filters">
+          <select class="select" id="filterStatus" onchange="renderLeads()"><option value="">All Status</option><option>New</option><option>Attempting Contact</option><option>Connected</option><option>Test Ride Scheduled</option><option>Test Ride Done</option><option>Pre-Booking</option><option>Booking Done</option><option>Delivery Done</option><option>Lost</option><option>DND</option><option>Duplicate</option></select>
+          <select class="select" id="filterExec" onchange="renderLeads()"><option value="">All Executives</option></select>
+          <select class="select" id="filterSource" onchange="renderLeads()"><option value="">All Sources</option><option>Walk-in</option><option>Website</option><option>Ather App</option><option>Instagram</option><option>Google Ads</option><option>Referral</option><option>Justdial</option><option>Call</option><option>Exchange</option></select>
+          <select class="select" id="filterModel" onchange="renderLeads()"><option value="">All Models</option></select>
+          <select class="select" id="filterScore" onchange="renderLeads()"><option value="">All Scores</option><option value="hot">🔥 Hot</option><option value="warm">Warm</option><option value="cold">Cold</option></select>
+          <input class="input-sm mono" type="date" id="filterDate" onchange="renderLeads()">
+          <button class="btn" style="height:32px" onclick="clearFilters()">Clear</button>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th><th>Lead</th><th>Phone • Email</th><th>Model</th><th>Source</th><th>Score</th><th>Exec</th><th>Created • Age</th><th>Status</th><th>Follow-up</th><th>Actions</th></tr></thead><tbody id="leadTable"></tbody></table></div>
+        <div class="panel-head" style="background:var(--panel2)"><div style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;color:var(--muted)" id="bulkInfo">0 selected</span><select class="select" id="bulkAction" style="min-width:160px"><option value="">Bulk Action...</option><option value="assign">Re-assign Executive</option><option value="status-Connected">Mark Connected</option><option value="status-Test Ride Scheduled">Mark TR Scheduled</option><option value="status-Lost">Mark Lost</option><option value="delete">Delete</option></select><button class="btn" style="height:32px" onclick="applyBulk()">Apply</button></div><div class="mono" style="font-size:11px;color:var(--muted)">Duplicate check: Phone based • Auto-block enabled</div></div>
+      </div>
+    </div>
+
+    <!-- KANBAN VIEW -->
+    <div class="view" id="view-kanban"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:18px;font-weight:700">Pipeline Control Board</h2><div style="display:flex;gap:8px"><span class="chip chip-green">Drag to move status</span><button class="btn" style="height:32px" onclick="switchView('dashboard')">Back to Dashboard</button></div></div><div class="kanban" id="kanbanBoard"></div></div>
+
+    <!-- ANALYTICS VIEW -->
+    <div class="view" id="view-analytics">
+      <div class="analytics-grid">
+        <div class="chart-box"><h4>Source Performance (Lead → Booking)</h4><div id="sourceChart"></div></div>
+        <div class="chart-box"><h4>Executive Performance</h4><div id="execChart"></div></div>
+        <div class="chart-box"><h4>Model Interest</h4><div id="modelChart"></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="chart-box"><h4>Status Funnel • Lead Control Health</h4><div id="funnelChart" style="display:flex;flex-direction:column;gap:8px;margin-top:12px"></div></div>
+        <div class="chart-box"><h4>This Week Control Rules Applied</h4><div style="margin-top:12px;display:grid;gap:10px;font-size:13px">
+          <div style="display:flex;justify-content:space-between;padding:10px;background:var(--panel2);border-radius:10px;border:1px solid var(--border)"><span>Auto-assigned leads</span><b class="mono" id="metricAuto">0</b></div>
+          <div style="display:flex;justify-content:space-between;padding:10px;background:var(--panel2);border-radius:10px;border:1px solid var(--border)"><span>SLA breaches prevented</span><b class="mono" style="color:var(--green)" id="metricSLA">0</b></div>
+          <div style="display:flex;justify-content:space-between;padding:10px;background:var(--panel2);border-radius:10px;border:1px solid var(--border)"><span>Duplicates blocked</span><b class="mono" style="color:var(--yellow)" id="metricDup">0</b></div>
+          <div style="display:flex;justify-content:space-between;padding:10px;background:var(--panel2);border-radius:10px;border:1px solid var(--border)"><span>Avg follow-up delay</span><b class="mono" id="metricFollow">0h</b></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- CONTROL RULES VIEW -->
+    <div class="view" id="view-control">
+      <div style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:16px">
+        <div class="panel"><div class="panel-head"><h3>Lead Control Rules • Ather EX SOP</h3><span class="chip chip-green">ACTIVE</span></div><div style="padding:18px;display:grid;gap:16px">
+          <div style="padding:14px;background:var(--panel2);border:1px solid var(--border);border-radius:12px"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:13px">1. SLA - New Lead Contact</b><span class="chip chip-red">30 MINS</span></div><p style="font-size:12px;color:var(--muted);margin-top:6px">Every new lead must be called within 30 minutes. If not, auto-escalate to manager and mark SLA breach. System sends alert.</p><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px"><input type="checkbox" checked id="ruleSLA"> Enabled</label></div>
+          <div style="padding:14px;background:var(--panel2);border:1px solid var(--border);border-radius:12px"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:13px">2. Auto Round-Robin Assignment</b><span class="chip chip-green">ROUND ROBIN</span></div><p style="font-size:12px;color:var(--muted);margin-top:6px">Leads auto-assigned equally to executives. Skips on leave. Re-assign if no activity in 2 hours.</p><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px"><input type="checkbox" checked id="ruleRR"> Enabled • <span class="mono" id="rrIndexLabel">Index: 0</span></label></div>
+          <div style="padding:14px;background:var(--panel2);border:1px solid var(--border);border-radius:12px"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:13px">3. Duplicate Control</b><span class="chip chip-yellow">PHONE + 30 DAYS</span></div><p style="font-size:12px;color:var(--muted);margin-top:6px">Phone number duplicate blocked if same number exists in last 30 days. Old lead re-opened instead of new entry.</p><select class="select" style="margin-top:10px"><option>Block if duplicate < 30 days</option><option>Block if duplicate < 60 days</option><option>Always allow but warn</option></select></div>
+          <div style="padding:14px;background:var(--panel2);border:1px solid var(--border);border-radius:12px"><b style="font-size:13px">4. Follow-up Cadence</b><p style="font-size:12px;color:var(--muted);margin-top:6px">Hot: Daily • Warm: Every 3 days • Cold: Weekly • TR Scheduled: Day before reminder</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><div><label style="font-size:11px;color:var(--muted)">Hot Leads</label><input class="form-input" style="height:34px;margin-top:4px" value="Every 24 hours"></div><div><label style="font-size:11px;color:var(--muted)">Lost Re-engage</label><input class="form-input" style="height:34px;margin-top:4px" value="After 15 days"></div></div></div>
+          <div style="padding:14px;background:var(--panel2);border:1px solid var(--border);border-radius:12px"><b style="font-size:13px">5. Lead Scoring</b><p style="font-size:12px;color:var(--muted);margin-top:6px">Auto score based on source + intent + response. Walk-in & Referral = Hot default. Website = Warm. Justdial = Cold.</p><div style="display:flex;gap:8px;margin-top:10px"><span class="lead-score score-hot">H</span><span style="font-size:11px">Walk-in, Referral, Exchange, TR Done</span></div></div>
+        </div></div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="panel"><div class="panel-head"><h3>Escalation Matrix</h3></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px;font-size:12px">
+            <div style="display:flex;gap:10px;align-items:center"><div style="width:32px;height:32px;border-radius:50%;background:var(--red-dim);color:var(--red);display:grid;place-items:center;font-weight:700">L1</div><div><b>Executive</b><br><span style="color:var(--muted)">0-30 mins response</span></div></div>
+            <div style="display:flex;gap:10px;align-items:center"><div style="width:32px;height:32px;border-radius:50%;background:var(--yellow-dim);color:var(--yellow);display:grid;place-items:center;font-weight:700">L2</div><div><b>Team Lead / Asst Manager</b><br><span style="color:var(--muted)">30-120 mins no contact</span></div></div>
+            <div style="display:flex;gap:10px;align-items:center"><div style="width:32px;height:32px;border-radius:50%;background:var(--panel3);border:1px solid var(--border);display:grid;place-items:center;font-weight:700">L3</div><div><b>EX Center Manager</b><br><span style="color:var(--muted)">2h+ no update or 24h lost</span></div></div>
+          </div></div>
+          <div class="panel" style="background:var(--text);color:var(--bg)"><div style="padding:18px"><h3 style="color:var(--bg);font-size:14px">Ather EX Center Daily Control Checklist</h3><div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;font-size:12px;font-weight:600">
+            <label style="display:flex;gap:8px"><input type="checkbox"> Morning: Assign overnight leads</label>
+            <label style="display:flex;gap:8px"><input type="checkbox"> 10 AM: Check SLA breaches</label>
+            <label style="display:flex;gap:8px"><input type="checkbox"> 2 PM: Test ride reminder calls</label>
+            <label style="display:flex;gap:8px"><input type="checkbox"> 6 PM: Booking follow-up push</label>
+            <label style="display:flex;gap:8px"><input type="checkbox"> EOD: Update lost reasons</label>
+          </div><button class="btn" style="background:var(--bg);color:var(--text);margin-top:16px;width:100%" onclick="alert('Daily report will be generated!')">Generate D2D Report</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS VIEW -->
+    <div class="view" id="view-reports">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700">Monthly Control Report</h2>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Advance month-wise breakdown • Model interest vs bought • Cash/Finance • Lead health</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="select mono" id="reportMonth" onchange="renderReports()" style="min-width:160px"></select>
+          <button class="btn" onclick="exportMonthReport()">⎙ Export Report CSV</button>
+          <button class="btn" onclick="exportMonthLeads()">⎙ Export Month Leads</button>
+        </div>
+      </div>
+
+      <div class="stats" id="reportStats"></div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h3>Model Interested vs Bought</h3></div>
+          <div class="table-wrap" style="max-height:320px"><table><thead><tr><th>Model</th><th>Interested</th><th>Bought (Booking+Delivery)</th><th>Conv %</th></tr></thead><tbody id="modelReportBody"></tbody></table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Finance vs Cash • This Month</h3></div>
+          <div style="padding:16px" id="paymentReportBody"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h3>Lead Section • Status &amp; Source Breakdown</h3></div>
+          <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div><h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">By Status</h4><div id="reportStatusChart"></div></div>
+            <div><h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">By Source</h4><div id="reportSourceChart"></div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Executive Performance • Target vs Achievement</h3></div>
+          <div class="table-wrap" style="max-height:320px"><table><thead><tr><th>Executive</th><th>Leads</th><th>Bookings</th><th>Target</th><th>Achieved %</th></tr></thead><tbody id="execReportBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Lost Reasons • This Month</h3></div>
+        <div style="padding:16px" id="lostReportBody"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div class="view" id="view-settings">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <div class="panel">
+          <div class="panel-head"><h3>Appearance • Theme</h3><span class="chip chip-green">FULL CUSTOM</span></div>
+          <div style="padding:18px">
+            <div class="settings-row">
+              <div><b style="font-size:13px">Mode</b><div style="font-size:11px;color:var(--muted);margin-top:2px">Dark or Light interface</div></div>
+              <div class="theme-toggle" id="themeToggle">
+                <button id="themeDarkBtn" onclick="setTheme('dark')">🌙 Dark</button>
+                <button id="themeLightBtn" onclick="setTheme('light')">☀️ Light</button>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div><b style="font-size:13px">Accent Color</b><div style="font-size:11px;color:var(--muted);margin-top:2px">Buttons, highlights, success chips</div></div>
+              <input type="color" class="color-swatch" id="accentPicker" value="#00ff88" oninput="setAccent(this.value)">
+            </div>
+            <div class="settings-row">
+              <div><b style="font-size:13px">Alert / Danger Color</b><div style="font-size:11px;color:var(--muted);margin-top:2px">SLA breach, lost leads</div></div>
+              <input type="color" class="color-swatch" id="dangerPicker" value="#ff3b3b" oninput="setDanger(this.value)">
+            </div>
+            <div class="settings-row">
+              <div><b style="font-size:13px">Warning Color</b><div style="font-size:11px;color:var(--muted);margin-top:2px">Pending / test-ride states</div></div>
+              <input type="color" class="color-swatch" id="warnPicker" value="#ffcc00" oninput="setWarn(this.value)">
+            </div>
+            <button class="btn" style="width:100%;margin-top:10px" onclick="resetTheme()">↺ Reset to Ather Default</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Sales Team • Custom Executives</h3><button class="btn" style="height:32px" onclick="addExecutive()">+ Add Executive</button></div>
+          <div style="padding:14px" id="execSettingsList"></div>
+        </div>
+
+        <div class="panel" style="grid-column:1 / -1">
+          <div class="panel-head"><h3>Ather Models • Variants • Colours</h3><button class="btn btn-primary" style="height:32px" onclick="addModel()">+ Add Model</button></div>
+          <div style="padding:14px" id="modelSettingsList"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="leadModal">
+  <div class="modal">
+    <div class="modal-head"><h2 id="modalTitle">Add New Lead • Control Entry</h2><button class="btn btn-ghost" style="height:32px" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-field"><label>Full Name *</label><input class="form-input" id="f_name" placeholder="e.g. Rahul Sharma"></div>
+        <div class="form-field"><label>Phone * (10 digits)</label><input class="form-input mono" id="f_phone" placeholder="98XXXXXXXX" maxlength="10"></div>
+        <div class="form-field"><label>Email</label><input class="form-input" id="f_email" placeholder="rahul@gmail.com"></div>
+        <div class="form-field"><label>Model Interest *</label><select class="form-input" id="f_model" onchange="onModelChange()"></select></div>
+        <div class="form-field"><label>Variant</label><select class="form-input" id="f_variant" onchange="onVariantChange()"></select></div>
+        <div class="form-field"><label>Colour</label><select class="form-input" id="f_color"></select></div>
+        <div class="form-field"><label>Lead Source *</label><select class="form-input" id="f_source"><option>Walk-in</option><option>Website</option><option>Ather App</option><option>Instagram</option><option>Google Ads</option><option>Referral</option><option>Justdial</option><option>Call</option><option>Exchange</option><option>Existing Customer</option></select></div>
+        <div class="form-field"><label>Lead Score / Priority</label><select class="form-input" id="f_score"><option value="hot">🔥 Hot - Ready to buy (7 days)</option><option value="warm" selected>☀️ Warm - Considering (15 days)</option><option value="cold">❄️ Cold - Just enquiry</option></select></div>
+        <div class="form-field"><label>Assign Executive *</label><select class="form-input" id="f_exec"></select></div>
+        <div class="form-field"><label>Status</label><select class="form-input" id="f_status"><option>New</option><option>Attempting Contact</option><option>Connected</option><option>Test Ride Scheduled</option><option>Test Ride Done</option><option>Pre-Booking</option><option>Booking Done</option><option>Delivery Done</option><option>Lost</option><option>Future Prospect</option></select></div>
+        <div class="form-field"><label>Next Follow-up Date *</label><input class="form-input mono" type="date" id="f_follow"></div>
+        <div class="form-field"><label>Test Ride Date</label><input class="form-input mono" type="datetime-local" id="f_trdate"></div>
+        <div class="form-field"><label>Payment Mode</label><select class="form-input" id="f_payment"><option value="">Not Decided</option><option value="Cash">Cash</option><option value="Finance">Finance</option></select></div>
+        <div class="form-field"><label>Booking / Order Amount (₹)</label><input class="form-input mono" type="number" id="f_amount" placeholder="e.g. 125000"></div>
+        <div class="form-field full"><label>Address / Location</label><input class="form-input" id="f_location" placeholder="Area, City"></div>
+        <div class="form-field full"><label>Notes / Requirement / Lost Reason</label><textarea class="form-input" id="f_notes" placeholder="Customer wants EMI info, exchanged Activa, needs finance..."></textarea></div>
+      </div>
+      <div id="dupWarning" style="display:none;padding:10px;background:var(--yellow-dim);border:1px solid rgba(255,204,0,0.2);border-radius:10px;font-size:12px;color:var(--yellow)">⚠️ Duplicate found! Same phone exists. This will update existing lead instead of creating new (Control enabled).</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-green" id="saveBtn" onclick="saveLead()">💾 Save Lead • Auto-Control</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Data */
+const defaultExecs = [{id:'e1', name:'Rajesh Kumar', short:'RK', color:'#00ff88', leads:0}, {id:'e2', name:'Amit Singh', short:'AS', color:'#3b82f6', leads:0}, {id:'e3', name:'Priya Sharma', short:'PS', color:'#ffcc00', leads:0}]
+let executives = JSON.parse(localStorage.getItem('ather_execs')||'null') || defaultExecs;
+let leads = JSON.parse(localStorage.getItem('ather_leads_v1')||'[]');
+let rrIndex = parseInt(localStorage.getItem('ather_rr')||'0');
+let selected = new Set();
+let editingId = null;
+
+/* ---- Custom Models / Variants / Colours ---- */
+const defaultModels = [
+  {id:'md1', name:'450X', variants:[
+    {id:'v1', name:'Standard', colors:['Space Grey','Mint Green','White']},
+    {id:'v2', name:'Pro Pack', colors:['Still Red','Cyber Yellow','Salt Green']}
+  ]},
+  {id:'md2', name:'450S', variants:[{id:'v3', name:'Base', colors:['White','Grey']}]},
+  {id:'md3', name:'Rizta S', variants:[{id:'v4', name:'Base', colors:['Amber Orange','Bronze Green']}]},
+  {id:'md4', name:'Rizta Z', variants:[{id:'v5', name:'Point', colors:['Cosmic Black']},{id:'v6', name:'Duo/Duo+', colors:['Cerulean Blue','Fig Purple']}]},
+  {id:'md5', name:'Not Sure', variants:[]}
+];
+let models = JSON.parse(localStorage.getItem('ather_models')||'null') || defaultModels;
+function persistModels(){ localStorage.setItem('ather_models', JSON.stringify(models)); }
+
+/* ---- Theme / Custom Colours ---- */
+function applyThemeVars(){
+  const theme = localStorage.getItem('ather_theme') || 'dark';
+  const accent = localStorage.getItem('ather_accent') || '#00ff88';
+  const danger = localStorage.getItem('ather_danger') || '#ff3b3b';
+  const warn = localStorage.getItem('ather_warn') || '#ffcc00';
+  document.body.setAttribute('data-theme', theme);
+  document.documentElement.style.setProperty('--green', accent);
+  document.documentElement.style.setProperty('--red', danger);
+  document.documentElement.style.setProperty('--yellow', warn);
+  const at=document.getElementById('themeDarkBtn'), lt=document.getElementById('themeLightBtn');
+  if(at && lt){ at.classList.toggle('active', theme==='dark'); lt.classList.toggle('active', theme==='light'); }
+  const ap=document.getElementById('accentPicker'); if(ap) ap.value=accent;
+  const dp=document.getElementById('dangerPicker'); if(dp) dp.value=danger;
+  const wp=document.getElementById('warnPicker'); if(wp) wp.value=warn;
+}
+function setTheme(t){ localStorage.setItem('ather_theme', t); applyThemeVars(); }
+function setAccent(c){ localStorage.setItem('ather_accent', c); applyThemeVars(); }
+function setDanger(c){ localStorage.setItem('ather_danger', c); applyThemeVars(); }
+function setWarn(c){ localStorage.setItem('ather_warn', c); applyThemeVars(); }
+function resetTheme(){ localStorage.removeItem('ather_theme'); localStorage.removeItem('ather_accent'); localStorage.removeItem('ather_danger'); localStorage.removeItem('ather_warn'); applyThemeVars(); }
+
+const statuses = ["New","Attempting Contact","Connected","Test Ride Scheduled","Test Ride Done","Pre-Booking","Booking Done","Delivery Done","Lost"]
+
+function todayStr(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().split('T')[0];}
+function nowLocal(){ return new Date().toISOString().slice(0,16);}
+
+applyThemeVars();
+document.getElementById('todayDate').innerText = new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+document.getElementById('centerName').addEventListener('input', e=>{ document.getElementById('logoCenter').innerText = `EX Center • ${e.target.value.split(' - ').pop() || 'CRM'}`; localStorage.setItem('ather_center', e.target.value);});
+document.getElementById('centerName').value = localStorage.getItem('ather_center') || 'Ather Space - Udaipur';
+
+function persist(){ localStorage.setItem('ather_leads_v1', JSON.stringify(leads)); localStorage.setItem('ather_execs', JSON.stringify(executives)); localStorage.setItem('ather_rr', rrIndex+''); updateExecList(); }
+
+function updateExecList(){
+  const wrap=document.getElementById('execList'); wrap.innerHTML='';
+  const filterExec=document.getElementById('filterExec'); filterExec.innerHTML='<option value="">All Executives</option>';
+  const f_exec=document.getElementById('f_exec'); f_exec.innerHTML='';
+  executives.forEach((ex, i)=>{
+    const cnt = leads.filter(l=>l.execId===ex.id && !['Lost','Delivery Done','DND','Duplicate'].includes(l.status)).length;
+    wrap.innerHTML += `<div class="exec-chip"><div class="av" style="background:${ex.color}20;color:${ex.color};border:1px solid ${ex.color}40">${ex.short}</div><span style="font-weight:600">${ex.name.split(' ')[0]}</span><small>${cnt}</small></div>`;
+    filterExec.innerHTML += `<option value="${ex.id}">${ex.name}</option>`;
+    f_exec.innerHTML += `<option value="${ex.id}">${ex.name}</option>`;
+    if(i===rrIndex % executives.length) document.getElementById('rrInfo').innerText = `Next: ${ex.name.split(' ')[0]} • Index ${rrIndex}`;
+  });
+  document.getElementById('rrIndexLabel').innerText = `Index: ${rrIndex} • Next ${executives[rrIndex % executives.length]?.name || ''}`;
+  renderModelSelects();
+  renderExecSettings();
+  renderModelSettings();
+}
+
+/* ---- Dynamic Model/Variant/Colour selects ---- */
+function renderModelSelects(){
+  const fm=document.getElementById('filterModel'); const curFilter=fm.value;
+  fm.innerHTML='<option value="">All Models</option>' + models.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+  fm.value = curFilter;
+
+  const f_model=document.getElementById('f_model'); if(!f_model) return;
+  const curModel=f_model.value;
+  f_model.innerHTML = models.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+  if(curModel && models.some(m=>m.name===curModel)) f_model.value=curModel;
+  onModelChange(document.getElementById('f_variant')?.dataset.keep);
+}
+function onModelChange(keepVariant){
+  const f_model=document.getElementById('f_model'); const f_variant=document.getElementById('f_variant'); const f_color=document.getElementById('f_color');
+  if(!f_model||!f_variant||!f_color) return;
+  const m = models.find(x=>x.name===f_model.value);
+  const variants = m? m.variants : [];
+  f_variant.innerHTML = variants.length? variants.map(v=>`<option value="${v.name}">${v.name}</option>`).join('') : '<option value="">-</option>';
+  if(keepVariant && variants.some(v=>v.name===keepVariant)) f_variant.value=keepVariant;
+  onVariantChange();
+}
+function onVariantChange(){
+  const f_model=document.getElementById('f_model'); const f_variant=document.getElementById('f_variant'); const f_color=document.getElementById('f_color');
+  if(!f_model||!f_variant||!f_color) return;
+  const m = models.find(x=>x.name===f_model.value);
+  const v = m? m.variants.find(x=>x.name===f_variant.value) : null;
+  const colors = v? v.colors : [];
+  f_color.innerHTML = colors.length? colors.map(c=>`<option value="${c}">${c}</option>`).join('') : '<option value="">-</option>';
+}
+
+/* ---- Settings: Sales Team CRUD ---- */
+function renderExecSettings(){
+  const wrap=document.getElementById('execSettingsList'); if(!wrap) return;
+  if(!executives.length){ wrap.innerHTML='<div class="empty"><b>No executives</b>Add your first sales executive</div>'; return; }
+  wrap.innerHTML = executives.map(ex=>{
+    const cnt = leads.filter(l=>l.execId===ex.id).length;
+    return `<div class="settings-row">
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="color" class="color-swatch" style="width:28px;height:28px" value="${ex.color}" onchange="updateExecColor('${ex.id}', this.value)">
+        <div><b style="font-size:13px">${ex.name}</b><div style="font-size:11px;color:var(--muted)">${cnt} leads handled</div></div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input class="input-sm mono" type="number" style="width:90px" placeholder="Target" value="${ex.target||''}" onchange="updateExecTarget('${ex.id}', this.value)" title="Monthly booking target">
+        <button class="btn" style="height:30px;font-size:11px" onclick="renameExec('${ex.id}')">Rename</button>
+        <button class="btn" style="height:30px;font-size:11px" onclick="deleteExec('${ex.id}')">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function updateExecTarget(id,val){ const ex=executives.find(e=>e.id===id); if(ex){ ex.target=parseInt(val)||0; persist(); } }
+function updateExecColor(id,color){ const ex=executives.find(e=>e.id===id); if(ex){ ex.color=color; persist(); renderAll(); } }
+function renameExec(id){ const ex=executives.find(e=>e.id===id); if(!ex) return; const name=prompt('Executive full name:', ex.name); if(!name) return; ex.name=name; ex.short=name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); persist(); renderAll(); }
+function deleteExec(id){ if(executives.length<=1){ alert('At least one executive is required'); return; } if(!confirm('Remove this executive? Their leads stay but show Unassigned until reassigned.')) return; executives=executives.filter(e=>e.id!==id); if(rrIndex>=executives.length) rrIndex=0; persist(); renderAll(); }
+
+/* ---- Settings: Models / Variants / Colours CRUD ---- */
+function renderModelSettings(){
+  const wrap=document.getElementById('modelSettingsList'); if(!wrap) return;
+  if(!models.length){ wrap.innerHTML='<div class="empty"><b>No models</b>Add your first model</div>'; return; }
+  wrap.innerHTML = models.map(m=>`
+    <div class="variant-block">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b style="font-size:14px">${m.name}</b>
+        <div style="display:flex;gap:6px">
+          <button class="btn" style="height:28px;font-size:11px" onclick="addVariant('${m.id}')">+ Variant</button>
+          <button class="btn" style="height:28px;font-size:11px" onclick="renameModel('${m.id}')">Rename</button>
+          <button class="btn" style="height:28px;font-size:11px" onclick="deleteModel('${m.id}')">Remove</button>
+        </div>
+      </div>
+      ${(m.variants||[]).map(v=>`
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;font-weight:600">${v.name}</span>
+            <div style="display:flex;gap:6px">
+              <button class="btn" style="height:24px;font-size:10px;padding:0 8px" onclick="addColor('${m.id}','${v.id}')">+ Colour</button>
+              <button class="btn" style="height:24px;font-size:10px;padding:0 8px" onclick="renameVariant('${m.id}','${v.id}')">Rename</button>
+              <button class="btn" style="height:24px;font-size:10px;padding:0 8px" onclick="deleteVariant('${m.id}','${v.id}')">✕</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+            ${(v.colors||[]).map(c=>`<span class="tag-pill">${c}<button onclick="deleteColor('${m.id}','${v.id}','${c.replace(/'/g,"\\'")}')">✕</button></span>`).join('') || '<span style="font-size:11px;color:var(--muted)">No colours yet</span>'}
+          </div>
+        </div>`).join('') || '<div style="font-size:11px;color:var(--muted);margin-top:8px">No variants yet</div>'}
+    </div>`).join('');
+}
+function addModel(){ const name=prompt('New model name (e.g. 450 Apex):'); if(!name) return; models.push({id:'md'+Date.now(), name, variants:[]}); persistModels(); renderAll(); }
+function renameModel(id){ const m=models.find(x=>x.id===id); if(!m) return; const name=prompt('Model name:', m.name); if(!name) return; const old=m.name; m.name=name; leads.forEach(l=>{ if(l.model===old) l.model=name; }); persistModels(); persist(); renderAll(); }
+function deleteModel(id){ if(!confirm('Remove this model and all its variants/colours?')) return; models=models.filter(m=>m.id!==id); persistModels(); renderAll(); }
+function addVariant(modelId){ const name=prompt('New variant name (e.g. Pro Pack):'); if(!name) return; const m=models.find(x=>x.id===modelId); if(!m) return; m.variants.push({id:'v'+Date.now(), name, colors:[]}); persistModels(); renderAll(); }
+function renameVariant(modelId,variantId){ const m=models.find(x=>x.id===modelId); const v=m?.variants.find(x=>x.id===variantId); if(!v) return; const name=prompt('Variant name:', v.name); if(!name) return; v.name=name; persistModels(); renderAll(); }
+function deleteVariant(modelId,variantId){ if(!confirm('Remove this variant and its colours?')) return; const m=models.find(x=>x.id===modelId); if(!m) return; m.variants=m.variants.filter(v=>v.id!==variantId); persistModels(); renderAll(); }
+function addColor(modelId,variantId){ const name=prompt('New colour name (e.g. Cosmic Black):'); if(!name) return; const m=models.find(x=>x.id===modelId); const v=m?.variants.find(x=>x.id===variantId); if(!v) return; v.colors.push(name); persistModels(); renderAll(); }
+function deleteColor(modelId,variantId,color){ const m=models.find(x=>x.id===modelId); const v=m?.variants.find(x=>x.id===variantId); if(!v) return; v.colors=v.colors.filter(c=>c!==color); persistModels(); renderAll(); }
+
+function scoreColor(s){ return s==='hot'?'score-hot':s==='warm'?'score-warm':'score-cold'; }
+function statusClass(s){ return 'status-pill s-' + s.replaceAll(' ','\\ '); }
+
+function leadAge(created){ const diff = Date.now() - new Date(created).getTime(); const mins = Math.floor(diff/60000); if(mins<60) return mins+'m'; const hrs=Math.floor(mins/60); if(hrs<24) return hrs+'h'; return Math.floor(hrs/24)+'d';}
+function isSLABreach(l){ return l.status==='New' && (Date.now() - new Date(l.created).getTime()) > 30*60000; }
+function isOverdue(l){ if(!l.follow) return false; const f=new Date(l.follow); f.setHours(0,0,0,0); const t=new Date(); t.setHours(0,0,0,0); return f < t && !['Delivery Done','Lost','DND','Duplicate'].includes(l.status); }
+
+function renderAll(){
+  renderDashboard(); renderLeads(); renderKanban(); renderAnalytics(); updateExecList(); populateMonthSelects();
+}
+
+function renderDashboard(){
+  const total=leads.length;
+  const today = leads.filter(l=> new Date(l.created).toDateString()===new Date().toDateString()).length;
+  const hot = leads.filter(l=> l.score==='hot' && !['Booking Done','Delivery Done','Lost'].includes(l.status)).length;
+  const trPending = leads.filter(l=> l.status==='Test Ride Scheduled').length;
+  const bookings = leads.filter(l=> ['Booking Done','Pre-Booking','Delivery Done'].includes(l.status)).length;
+  const contacted = leads.filter(l=> !['New'].includes(l.status)).length;
+  const conv = contacted? Math.round((bookings/contacted)*100):0;
+  const sla = leads.filter(isSLABreach).length;
+  const overdue = leads.filter(isOverdue).length;
+
+  // avg response approx mock
+  const avgTime = leads.length? Math.max(8, Math.floor(35 - (hot*0.5))) + 'm' : '0m';
+
+  document.getElementById('statTotal').innerText=total;
+  document.getElementById('statTodayGrowth').innerText=`+${today} today`;
+  document.getElementById('statHot').innerText=hot;
+  document.getElementById('statTRPending').innerText=trPending;
+  document.getElementById('statBooking').innerText=bookings;
+  document.getElementById('statConv').innerText=conv;
+  document.getElementById('statAvgTime').innerText=avgTime;
+  document.getElementById('slaCount').innerText=sla;
+  document.getElementById('overdueCount').innerText=overdue;
+  document.getElementById('todayFollowCount').innerText=leads.filter(l=> l.follow===todayStr()).length + ' DUE TODAY';
+  document.getElementById('metricAuto').innerText= localStorage.getItem('ather_metric_auto')|| (today*0.8|0);
+  document.getElementById('metricSLA').innerText=sla? overdue : Math.floor(total*0.12);
+  document.getElementById('metricDup').innerText= localStorage.getItem('ather_metric_dup')|| '0';
+  document.getElementById('metricFollow').innerText= overdue>5? '12h':'3.2h';
+
+  const recentBody=document.getElementById('recentTable');
+  const qf=document.getElementById('quickFilter').value;
+  let recent=[...leads].sort((a,b)=> new Date(b.created)-new Date(a.created)).slice(0,8);
+  if(qf==='New') recent=leads.filter(l=>l.status==='New').slice(0,8);
+  if(qf==='overdue') recent=leads.filter(isOverdue).slice(0,8);
+  if(qf==='sla') recent=leads.filter(isSLABreach).slice(0,8);
+
+  if(!recent.length) recentBody.innerHTML=`<tr><td colspan="6"><div class="empty"><b>No leads in this view</b>Click + New Lead to create first controlled lead</div></td></tr>`;
+  else recentBody.innerHTML=recent.map(l=>`<tr>
+    <td><div class="user-cell"><div class="${scoreColor(l.score)} lead-score">${l.score==='hot'?'!':l.score==='warm'?'~':'-'}</div><div><b style="font-size:13px">${l.name}</b><div class="mono" style="font-size:10px;color:var(--muted)">${leadAge(l.created)} ago • ${l.score}</div></div></div></td>
+    <td><div class="mono" style="font-size:12px">${l.phone}</div><div style="font-size:11px;color:var(--muted)">${l.source}</div></td>
+    <td><b>${l.model}</b><div style="font-size:11px;color:var(--muted)">${l.location||'-'}</div></td>
+    <td><span class="k-card-exec">${executives.find(e=>e.id===l.execId)?.name.split(' ')[0]||'-'}</span><div style="font-size:10px;color:${isSLABreach(l)?'var(--red)':'var(--muted)'};margin-top:4px">${isSLABreach(l)?'⚠️ SLA BREACH':''} ${leadAge(l.created)}</div></td>
+    <td><span class="${statusClass(l.status)}"><span class="status-dot" style="background:currentColor"></span>${l.status}</span><div style="font-size:11px;color:var(--muted);margin-top:4px">→ ${l.follow||'No follow-up'}</div></td>
+    <td><button class="btn" style="height:28px;font-size:11px" onclick="editLead('${l.id}')">Edit</button></td>
+  </tr>`).join('');
+
+  const followWrap=document.getElementById('followUpList');
+  const todays=leads.filter(l=> l.follow && new Date(l.follow).toDateString()===new Date().toDateString() && !['Delivery Done','Lost'].includes(l.status)).sort((a,b)=> (a.score==='hot'?-1:1));
+  if(!todays.length) followWrap.innerHTML=`<div class="empty"><b>All clear for today ✨</b>No follow-ups pending. Great control!</div>`;
+  else followWrap.innerHTML=todays.map(l=>`<div style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--panel2);border:1px solid ${l.score==='hot'?'rgba(255,59,59,0.2)': 'var(--border)'};border-radius:10px">
+    <div class="${scoreColor(l.score)} lead-score">${l.score[0].toUpperCase()}</div><div style="flex:1"><b style="font-size:12px">${l.name}</b> • <span class="mono" style="font-size:11px">${l.phone}</span><div style="font-size:11px;color:var(--muted)">${l.model} • ${l.status} • ${executives.find(e=>e.id===l.execId)?.name.split(' ')[0]}</div></div><button class="btn" style="height:30px" onclick="editLead('${l.id}')">Call</button>
+  </div>`).join('');
+}
+
+function renderLeads(){
+  const search=document.getElementById('globalSearch').value.toLowerCase();
+  const fs=document.getElementById('filterStatus').value;
+  const fe=document.getElementById('filterExec').value;
+  const fso=document.getElementById('filterSource').value;
+  const fm=document.getElementById('filterModel').value;
+  const fsc=document.getElementById('filterScore').value;
+  const fd=document.getElementById('filterDate').value;
+
+  let filtered=leads.filter(l=>{
+    if(search && !(l.name.toLowerCase().includes(search) || l.phone.includes(search) || (l.email||'').toLowerCase().includes(search))) return false;
+    if(fs && l.status!==fs) return false;
+    if(fe && l.execId!==fe) return false;
+    if(fso && l.source!==fso) return false;
+    if(fm && l.model!==fm) return false;
+    if(fsc && l.score!==fsc) return false;
+    if(fd && !l.created.startsWith(fd)) return false;
+    return true;
+  }).sort((a,b)=> new Date(b.created)-new Date(a.created));
+
+  document.getElementById('leadCountLabel').innerText=`${filtered.length} leads • ${leads.filter(isSLABreach).length} SLA breach • ${leads.filter(isOverdue).length} overdue`;
+  const tbody=document.getElementById('leadTable');
+  if(!filtered.length) tbody.innerHTML=`<tr><td colspan="11"><div class="empty"><b>No leads found</b>Try clearing filters or add a new lead with controlled assignment</div></td></tr>`;
+  else tbody.innerHTML=filtered.map(l=>`<tr style="${isSLABreach(l)?'background:rgba(255,59,59,0.05)':''}${isOverdue(l)?'background:rgba(255,204,0,0.05)':''}">
+    <td><input type="checkbox" ${selected.has(l.id)?'checked':''} onchange="toggleSelect('${l.id}')"></td>
+    <td><div class="user-cell"><div class="avatar">${l.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div><div><b>${l.name}</b><div style="font-size:11px;color:var(--muted)">${l.location||'No location'}</div></div></div></td>
+    <td><div class="mono" style="font-weight:600">${l.phone}</div><div style="font-size:11px;color:var(--muted)">${l.email||''}</div></td>
+    <td><b>${l.model}</b></td><td>${l.source}</td><td><span class="${scoreColor(l.score)} lead-score">${l.score[0].toUpperCase()}</span></td>
+    <td><span class="k-card-exec">${executives.find(e=>e.id===l.execId)?.name || 'Unassigned'}</span></td>
+    <td><span class="mono" style="font-size:11px">${new Date(l.created).toLocaleDateString('en-IN')}</span><div style="font-size:10px;color:${isSLABreach(l)?'var(--red)':'var(--muted)'}">${leadAge(l.created)} ago ${isSLABreach(l)?'⚠️':''}</div></td>
+    <td><span class="${statusClass(l.status)}" style="font-size:11px">${l.status}</span></td>
+    <td><span class="mono" style="font-size:11px;color:${isOverdue(l)?'var(--red)':''}">${l.follow||'-'}</span></td>
+    <td><div style="display:flex;gap:4px"><button class="btn" style="height:28px;padding:0 8px" onclick="editLead('${l.id}')">✎</button><button class="btn" style="height:28px;padding:0 8px" onclick="deleteLead('${l.id}')">✕</button></div></td>
+  </tr>`).join('');
+
+  document.getElementById('bulkInfo').innerText=`${selected.size} selected`;
+}
+
+function renderKanban(){
+  const board=document.getElementById('kanbanBoard'); board.innerHTML='';
+  statuses.forEach(st=>{
+    const colLeads=leads.filter(l=>l.status===st);
+    const col=document.createElement('div'); col.className='kanban-col'; col.dataset.status=st;
+    col.innerHTML=`<div class="k-head"><div class="k-title"><span class="status-dot" style="width:8px;height:8px;background:${st==='New'?'#888':st.includes('Test')?'var(--yellow)':st.includes('Booking')?'var(--green)':'var(--muted)'}"></span>${st}</div><span class="k-count mono">${colLeads.length}</span></div><div class="k-body" ondrop="drop(event,'${st}')" ondragover="allowDrop(event)">${colLeads.map(l=>`<div class="k-card" draggable="true" ondragstart="drag(event,'${l.id}')"><div class="k-card-top"><span class="k-card-name">${l.name}</span><span class="${scoreColor(l.score)} lead-score" style="width:20px;height:20px;font-size:9px">${l.score[0].toUpperCase()}</span></div><div class="k-card-meta"><span>📞 ${l.phone} • ${l.model}</span><span>👤 ${executives.find(e=>e.id===l.execId)?.name.split(' ')[0]||'UN'}</span><span>🕒 ${leadAge(l.created)} • ${l.source}</span></div><div class="k-card-foot"><span class="k-card-exec">${l.follow||'No follow'}</span><button class="btn" style="height:22px;font-size:10px;padding:0 6px" onclick="editLead('${l.id}')">Open</button></div></div>`).join('') || `<div class="empty" style="padding:20px">No leads</div>`}</div>`;
+    board.appendChild(col);
+  });
+}
+
+function renderAnalytics(){
+  const bySource={};const byExec={};const byModel={};const byStatus={};
+  leads.forEach(l=>{ bySource[l.source]=(bySource[l.source]||0)+1; const en=executives.find(e=>e.id===l.execId)?.name||'Unassigned'; byExec[en]=(byExec[en]||0)+1; byModel[l.model]=(byModel[l.model]||0)+1; byStatus[l.status]=(byStatus[l.status]||0)+1; });
+
+  const maxS=Math.max(1,...Object.values(bySource));
+  document.getElementById('sourceChart').innerHTML=Object.entries(bySource).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar-row"><span class="bar-label">${k}</span><div class="bar-track"><div class="bar-fill" style="width:${(v/maxS)*100}%"></div></div><span class="bar-val mono">${v}</span></div>`).join('') || '<div class="empty">No data</div>';
+
+  const maxE=Math.max(1,...Object.values(byExec));
+  document.getElementById('execChart').innerHTML=Object.entries(byExec).map(([k,v])=>`<div class="bar-row"><span class="bar-label">${k.split(' ')[0]}</span><div class="bar-track"><div class="bar-fill" style="width:${(v/maxE)*100}%;background:var(--green)"></div></div><span class="bar-val mono">${v}</span></div>`).join('') || '<div class="empty">No data</div>';
+
+  const maxM=Math.max(1,...Object.values(byModel));
+  document.getElementById('modelChart').innerHTML=Object.entries(byModel).map(([k,v])=>`<div class="bar-row"><span class="bar-label">${k}</span><div class="bar-track"><div class="bar-fill" style="width:${(v/maxM)*100}%;background:var(--blue)"></div></div><span class="bar-val mono">${v}</span></div>`).join('') || '<div class="empty">No data</div>';
+
+  const total=leads.length||1;
+  document.getElementById('funnelChart').innerHTML=statuses.map(st=>{ const c=byStatus[st]||0; const pct=Math.round((c/total)*100); return `<div class="bar-row"><span class="bar-label" style="width:140px">${st}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><span class="bar-val mono">${c} • ${pct}%</span></div>` }).join('');
+}
+
+/* ================= MONTH-WISE REPORTS MODULE ================= */
+function monthKey(d){ const dt=new Date(d); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`; }
+function monthLabel(key){ if(!key) return 'All Time'; const [y,m]=key.split('-'); return new Date(y, m-1, 1).toLocaleDateString('en-IN',{month:'long', year:'numeric'}); }
+function allMonthKeys(){
+  const set=new Set(leads.map(l=>monthKey(l.created)));
+  set.add(monthKey(new Date()));
+  return [...set].sort().reverse();
+}
+function populateMonthSelects(){
+  const keys=allMonthKeys();
+  const rm=document.getElementById('reportMonth');
+  if(rm){ const cur=rm.value; rm.innerHTML=keys.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join(''); rm.value = keys.includes(cur)? cur : keys[0]; }
+  const em=document.getElementById('exportMonth');
+  if(em){ const cur=em.value; em.innerHTML='<option value="">All Time</option>' + keys.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join(''); em.value = cur; }
+}
+function leadsForMonth(key){ if(!key) return leads; return leads.filter(l=> monthKey(l.created)===key); }
+
+function renderReports(){
+  populateMonthSelects();
+  const key=document.getElementById('reportMonth')?.value || monthKey(new Date());
+  const ml=leadsForMonth(key);
+  const bought=l=> ['Booking Done','Delivery Done'].includes(l.status);
+
+  // Summary stats
+  const total=ml.length; const bookings=ml.filter(bought).length; const delivered=ml.filter(l=>l.status==='Delivery Done').length; const lost=ml.filter(l=>l.status==='Lost').length;
+  const conv= total? Math.round((bookings/total)*100):0;
+  document.getElementById('reportStats').innerHTML=`
+    <div class="stat"><div class="stat-top"><span class="stat-label">Leads This Month</span><span class="stat-icon">◍</span></div><div class="stat-value">${total}</div><div class="stat-sub">${monthLabel(key)}</div></div>
+    <div class="stat"><div class="stat-top"><span class="stat-label">Bookings</span><span class="stat-icon">🔥</span></div><div class="stat-value">${bookings}</div><div class="stat-sub"><span class="chip chip-green">${conv}% conv</span></div></div>
+    <div class="stat"><div class="stat-top"><span class="stat-label">Deliveries</span><span class="stat-icon">↗</span></div><div class="stat-value">${delivered}</div><div class="stat-sub">Completed sales</div></div>
+    <div class="stat"><div class="stat-top"><span class="stat-label">Lost</span><span class="stat-icon" style="color:var(--red)">✕</span></div><div class="stat-value">${lost}</div><div class="stat-sub">${total? Math.round((lost/total)*100):0}% of month</div></div>`;
+
+  // Model Interested vs Bought
+  const byModelInt={}, byModelBought={};
+  ml.forEach(l=>{ byModelInt[l.model]=(byModelInt[l.model]||0)+1; if(bought(l)) byModelBought[l.model]=(byModelBought[l.model]||0)+1; });
+  const allModelNames=[...new Set([...Object.keys(byModelInt), ...models.map(m=>m.name)])];
+  document.getElementById('modelReportBody').innerHTML = allModelNames.map(m=>{
+    const i=byModelInt[m]||0, b=byModelBought[m]||0; const pct=i? Math.round((b/i)*100):0;
+    return `<tr><td><b>${m}</b></td><td>${i}</td><td>${b}</td><td><span class="chip ${pct>=30?'chip-green':pct>0?'chip-yellow':'chip-red'}">${pct}%</span></td></tr>`;
+  }).join('') || `<tr><td colspan="4"><div class="empty">No leads this month</div></td></tr>`;
+
+  // Finance vs Cash
+  const cash=ml.filter(l=>l.payment==='Cash'); const fin=ml.filter(l=>l.payment==='Finance'); const undecided=ml.filter(l=>!l.payment);
+  const cashAmt=cash.reduce((s,l)=>s+(l.amount||0),0); const finAmt=fin.reduce((s,l)=>s+(l.amount||0),0);
+  const maxPay=Math.max(1,cash.length,fin.length);
+  document.getElementById('paymentReportBody').innerHTML=`
+    <div class="bar-row"><span class="bar-label">Cash</span><div class="bar-track"><div class="bar-fill" style="width:${(cash.length/maxPay)*100}%;background:var(--green)"></div></div><span class="bar-val mono">${cash.length}</span></div>
+    <div class="bar-row"><span class="bar-label">Finance</span><div class="bar-track"><div class="bar-fill" style="width:${(fin.length/maxPay)*100}%;background:var(--blue)"></div></div><span class="bar-val mono">${fin.length}</span></div>
+    <div class="bar-row"><span class="bar-label">Not Decided</span><div class="bar-track"><div class="bar-fill" style="width:${(undecided.length/maxPay)*100}%;background:var(--muted2)"></div></div><span class="bar-val mono">${undecided.length}</span></div>
+    <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:11px;color:var(--muted)">CASH TOTAL VALUE</div><div style="font-size:18px;font-weight:700;margin-top:4px" class="mono">₹${cashAmt.toLocaleString('en-IN')}</div></div>
+      <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:11px;color:var(--muted)">FINANCE TOTAL VALUE</div><div style="font-size:18px;font-weight:700;margin-top:4px" class="mono">₹${finAmt.toLocaleString('en-IN')}</div></div>
+    </div>`;
+
+  // Lead status/source (this is the "Lead Section" report)
+  const byStatusM={}, bySourceM={};
+  ml.forEach(l=>{ byStatusM[l.status]=(byStatusM[l.status]||0)+1; bySourceM[l.source]=(bySourceM[l.source]||0)+1; });
+  const maxSt=Math.max(1,...Object.values(byStatusM),1);
+  document.getElementById('reportStatusChart').innerHTML=statuses.map(st=>{ const c=byStatusM[st]||0; return `<div class="bar-row"><span class="bar-label" style="width:110px">${st}</span><div class="bar-track"><div class="bar-fill" style="width:${(c/maxSt)*100}%"></div></div><span class="bar-val mono">${c}</span></div>`; }).join('');
+  const maxSo=Math.max(1,...Object.values(bySourceM),1);
+  document.getElementById('reportSourceChart').innerHTML=Object.entries(bySourceM).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar-row"><span class="bar-label" style="width:90px">${k}</span><div class="bar-track"><div class="bar-fill" style="width:${(v/maxSo)*100}%;background:var(--blue)"></div></div><span class="bar-val mono">${v}</span></div>`).join('') || '<div class="empty">No data</div>';
+
+  // Executive target vs achievement
+  document.getElementById('execReportBody').innerHTML = executives.map(ex=>{
+    const exLeads=ml.filter(l=>l.execId===ex.id); const exBookings=exLeads.filter(bought).length; const target=ex.target||0; const pct= target? Math.round((exBookings/target)*100) : 0;
+    return `<tr><td><span class="k-card-exec">${ex.name}</span></td><td>${exLeads.length}</td><td>${exBookings}</td><td class="mono">${target||'-'}</td><td>${target? `<span class="chip ${pct>=100?'chip-green':pct>=50?'chip-yellow':'chip-red'}">${pct}%</span>` : '<span style="color:var(--muted);font-size:11px">Not set</span>'}</td></tr>`;
+  }).join('') || `<tr><td colspan="5"><div class="empty">No executives</div></td></tr>`;
+
+  // Lost reasons (parsed from notes text of Lost leads, simple frequency of first clause)
+  const lostLeads=ml.filter(l=>l.status==='Lost');
+  if(!lostLeads.length){ document.getElementById('lostReportBody').innerHTML='<div class="empty"><b>No lost leads this month 🎉</b></div>'; }
+  else document.getElementById('lostReportBody').innerHTML = lostLeads.map(l=>`<div class="settings-row"><div><b style="font-size:13px">${l.name}</b><div style="font-size:11px;color:var(--muted)">${l.model} • ${executives.find(e=>e.id===l.execId)?.name||'Unassigned'}</div></div><div style="font-size:12px;color:var(--muted);max-width:50%;text-align:right">${l.notes||'No reason logged'}</div></div>`).join('');
+}
+
+function exportMonthReport(){
+  const key=document.getElementById('reportMonth')?.value || monthKey(new Date());
+  const ml=leadsForMonth(key); const bought=l=>['Booking Done','Delivery Done'].includes(l.status);
+  const rows=[['Metric','Value']];
+  rows.push(['Month', monthLabel(key)]);
+  rows.push(['Total Leads', ml.length]);
+  rows.push(['Bookings', ml.filter(bought).length]);
+  rows.push(['Deliveries', ml.filter(l=>l.status==='Delivery Done').length]);
+  rows.push(['Lost', ml.filter(l=>l.status==='Lost').length]);
+  rows.push(['Cash Deals', ml.filter(l=>l.payment==='Cash').length]);
+  rows.push(['Finance Deals', ml.filter(l=>l.payment==='Finance').length]);
+  rows.push(['Cash Value', ml.filter(l=>l.payment==='Cash').reduce((s,l)=>s+(l.amount||0),0)]);
+  rows.push(['Finance Value', ml.filter(l=>l.payment==='Finance').reduce((s,l)=>s+(l.amount||0),0)]);
+  rows.push([]); rows.push(['Model','Interested','Bought']);
+  const byI={}, byB={}; ml.forEach(l=>{ byI[l.model]=(byI[l.model]||0)+1; if(bought(l)) byB[l.model]=(byB[l.model]||0)+1; });
+  Object.keys(byI).forEach(m=> rows.push([m, byI[m], byB[m]||0]));
+  rows.push([]); rows.push(['Executive','Leads','Bookings','Target']);
+  executives.forEach(ex=>{ const exLeads=ml.filter(l=>l.execId===ex.id); rows.push([ex.name, exLeads.length, exLeads.filter(bought).length, ex.target||0]); });
+  const csv=rows.map(r=> r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`ather-report-${key}.csv`; a.click();
+}
+function exportMonthLeads(){
+  const key=document.getElementById('reportMonth')?.value || monthKey(new Date());
+  exportCSV(key);
+}
+/* ================= END REPORTS MODULE ================= */
+
+
+function openModal(edit=false){ document.getElementById('leadModal').classList.add('open'); document.getElementById('modalTitle').innerText= edit? 'Edit Lead • Control Update' : 'Add New Lead • Control Entry'; if(!edit){ editingId=null; document.getElementById('f_name').value=''; document.getElementById('f_phone').value=''; document.getElementById('f_email').value=''; renderModelSelects(); if(models[0]) document.getElementById('f_model').value=models[0].name; onModelChange(); document.getElementById('f_source').value='Walk-in'; document.getElementById('f_score').value='warm'; document.getElementById('f_status').value='New'; document.getElementById('f_follow').value= (()=>{ const d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]; })(); document.getElementById('f_trdate').value=''; document.getElementById('f_location').value=''; document.getElementById('f_notes').value=''; document.getElementById('f_payment').value=''; document.getElementById('f_amount').value=''; const nextExec=executives[rrIndex % executives.length]; if(nextExec) document.getElementById('f_exec').value=nextExec.id; } checkDupLive(); }
+function closeModal(){ document.getElementById('leadModal').classList.remove('open'); editingId=null; }
+
+document.getElementById('f_phone').addEventListener('input', checkDupLive);
+function checkDupLive(){
+  const phone=document.getElementById('f_phone').value.trim(); const dup=leads.find(l=> l.phone===phone && (!editingId || l.id!==editingId) && (Date.now()-new Date(l.created).getTime()) < 30*24*60*60*1000);
+  document.getElementById('dupWarning').style.display= dup? 'block':'none'; return dup;
+}
+
+function autoScore(source, model){
+  if(['Walk-in','Referral','Exchange'].includes(source)) return 'hot';
+  if(['Website','Ather App','Google Ads'].includes(source)) return 'warm';
+  return 'cold';
+}
+
+function saveLead(){
+  const name=document.getElementById('f_name').value.trim(); const phone=document.getElementById('f_phone').value.trim();
+  if(!name || !/^\d{10}$/.test(phone)){ alert('Name and 10-digit phone required!'); return; }
+  const email=document.getElementById('f_email').value.trim(); const model=document.getElementById('f_model').value; const variant=document.getElementById('f_variant').value; const color=document.getElementById('f_color').value; const source=document.getElementById('f_source').value; const score=document.getElementById('f_score').value || autoScore(source,model); const execId=document.getElementById('f_exec').value; const status=document.getElementById('f_status').value; const follow=document.getElementById('f_follow').value; const trdate=document.getElementById('f_trdate').value; const location=document.getElementById('f_location').value.trim(); const notes=document.getElementById('f_notes').value.trim(); const payment=document.getElementById('f_payment').value; const amount=parseFloat(document.getElementById('f_amount').value)||0;
+
+  const dup=checkDupLive();
+  if(dup && !editingId){
+    // update existing instead of duplicate
+    dup.status = status; dup.follow = follow; dup.notes = (dup.notes||'') + ' | ' + notes; dup.score = score; dup.execId = execId || dup.execId; dup.trdate = trdate || dup.trdate; dup.updated = new Date().toISOString();
+    let dupCnt=parseInt(localStorage.getItem('ather_metric_dup')||'0'); localStorage.setItem('ather_metric_dup', dupCnt+1+'');
+    persist(); renderAll(); closeModal(); alert(`Duplicate Control: Updated existing lead for ${dup.name} instead of creating new!`);
+    return;
+  }
+
+  if(editingId){
+    const idx=leads.findIndex(l=>l.id===editingId); if(idx>-1){ leads[idx]={...leads[idx], name, phone, email, model, variant, color, source, score, execId, status, follow, trdate, location, notes, payment, amount, updated:new Date().toISOString()}; }
+  } else {
+    const newLead={id:'L'+Date.now(), name, phone, email, model, variant, color, source, score: score || autoScore(source,model), execId, status, follow, trdate, location, notes, payment, amount, created:new Date().toISOString(), updated:new Date().toISOString()};
+    leads.unshift(newLead);
+    // auto advance RR if rule enabled and status new and auto assigned
+    if(document.getElementById('ruleRR')?.checked && execId===executives[rrIndex % executives.length]?.id){ rrIndex++; let autoCnt=parseInt(localStorage.getItem('ather_metric_auto')||'0'); localStorage.setItem('ather_metric_auto', autoCnt+1+''); }
+  }
+  persist(); renderAll(); closeModal();
+}
+
+function editLead(id){ const l=leads.find(x=>x.id===id); if(!l) return; editingId=id; openModal(true); document.getElementById('f_name').value=l.name; document.getElementById('f_phone').value=l.phone; document.getElementById('f_email').value=l.email||''; renderModelSelects(); document.getElementById('f_model').value=l.model; onModelChange(l.variant); if(l.color) document.getElementById('f_color').value=l.color; document.getElementById('f_source').value=l.source; document.getElementById('f_score').value=l.score; document.getElementById('f_exec').value=l.execId; document.getElementById('f_status').value=l.status; document.getElementById('f_follow').value=l.follow||''; document.getElementById('f_trdate').value=l.trdate||''; document.getElementById('f_location').value=l.location||''; document.getElementById('f_notes').value=l.notes||''; document.getElementById('f_payment').value=l.payment||''; document.getElementById('f_amount').value=l.amount||''; }
+function deleteLead(id){ if(!confirm('Delete this lead?')) return; leads=leads.filter(l=>l.id!==id); persist(); renderAll(); }
+function toggleSelect(id){ if(selected.has(id)) selected.delete(id); else selected.add(id); renderLeads(); }
+function toggleSelectAll(){ const all=document.getElementById('selectAll').checked; if(all) leads.forEach(l=> selected.add(l.id)); else selected.clear(); renderLeads(); }
+
+/* Control actions */
+function assignPending(){
+  const newLeads=leads.filter(l=>!l.execId || l.status==='New'); if(!newLeads.length){ alert('No unassigned/new leads'); return; }
+  newLeads.forEach(l=>{ l.execId=executives[rrIndex % executives.length].id; rrIndex++; }); persist(); renderAll(); alert(`Auto-assigned ${newLeads.length} leads via Round Robin!`);
+}
+function clearFilters(){ document.getElementById('filterStatus').value=''; document.getElementById('filterExec').value=''; document.getElementById('filterSource').value=''; document.getElementById('filterModel').value=''; document.getElementById('filterScore').value=''; document.getElementById('filterDate').value=''; document.getElementById('globalSearch').value=''; selected.clear(); renderLeads(); }
+function applyBulk(){ const action=document.getElementById('bulkAction').value; if(!action || !selected.size){ alert('Select leads and action'); return; } if(action.startsWith('status-')){ const st=action.replace('status-',''); leads.forEach(l=>{ if(selected.has(l.id)) l.status=st; }); } else if(action==='assign'){ const execId=prompt('Enter exec index 0-'+(executives.length-1)+': 0='+executives[0].name); if(execId!==null){ const ex=executives[parseInt(execId)]; if(ex) leads.forEach(l=>{ if(selected.has(l.id)) l.execId=ex.id; }); } } else if(action==='delete'){ if(confirm(`Delete ${selected.size} leads?`)) leads=leads.filter(l=>!selected.has(l.id)); } selected.clear(); persist(); renderAll(); }
+
+/* Drag Kanban */
+let dragId=null;
+function drag(ev,id){ dragId=id; ev.dataTransfer.effectAllowed='move'; }
+function allowDrop(ev){ ev.preventDefault(); }
+function drop(ev,status){ ev.preventDefault(); if(!dragId) return; const l=leads.find(x=>x.id===dragId); if(l){ l.status=status; l.updated=new Date().toISOString(); if(status==='Test Ride Done') l.score='hot'; persist(); renderAll(); } dragId=null; }
+
+/* Executive */
+function addExecutive(){ const name=prompt('Executive full name:'); if(!name) return; const short=name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); const colors=['#00ff88','#3b82f6','#ffcc00','#ff3b3b','#a78bfa']; executives.push({id:'e'+Date.now(), name, short, color:colors[executives.length%colors.length], leads:0}); persist(); renderAll(); }
+
+/* View switching */
+function switchView(viewName){
+  document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.view===viewName));
+  document.querySelectorAll('.view').forEach(v=> v.classList.remove('active'));
+  document.getElementById('view-'+viewName).classList.add('active');
+  if(viewName==='settings'){ applyThemeVars(); renderExecSettings(); renderModelSettings(); }
+  if(viewName==='reports'){ renderReports(); }
+}
+document.querySelectorAll('.nav-item').forEach(btn=> btn.addEventListener('click', ()=> switchView(btn.dataset.view)));
+
+/* Export / Import */
+function exportCSV(forceMonthKey){
+  const monthSel = forceMonthKey!==undefined ? forceMonthKey : document.getElementById('exportMonth')?.value;
+  const rowsData = monthSel ? leadsForMonth(monthSel) : leads;
+  const headers=['ID','Name','Phone','Email','Model','Variant','Colour','Source','Score','Executive','Status','Payment','Amount','FollowUp','TR Date','Location','Notes','Created']; const rows=rowsData.map(l=>[l.id,l.name,l.phone,l.email||'',l.model,l.variant||'',l.color||'',l.source,l.score,executives.find(e=>e.id===l.execId)?.name||'',l.status,l.payment||'',l.amount||'',l.follow||'',l.trdate||'',l.location||'',(l.notes||'').replace(/,/g,';'),l.created]); const csv=[headers.join(','), ...rows.map(r=> r.map(v=>`"${v}"`).join(','))].join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`ather-leads-${monthSel||todayStr()}.csv`; a.click(); }
+function importCSV(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=function(ev){ try{ const lines=ev.target.result.split('\n').slice(1); let added=0; lines.forEach(line=>{ if(!line.trim()) return; const cols=line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(c=>c.replace(/^"|"$/g,'')); if(cols.length<4) return; const [,name,phone,email,model,source,score,execName,status,follow]=cols; if(!/^\d{10}$/.test(phone)) return; if(leads.some(l=>l.phone===phone && (Date.now()-new Date(l.created).getTime())<30*24*60*60*1000)) return; const exec=executives.find(ex=> execName && execName.toLowerCase().includes(ex.name.split(' ')[0].toLowerCase())) || executives[rrIndex % executives.length]; const nl={id:'L'+Date.now()+added, name:name||'Unknown', phone, email:email||'', model:model||'450X', source:source||'Walk-in', score:score||'warm', execId:exec.id, status:status||'New', follow:follow||todayStr(), created:new Date().toISOString()}; leads.push(nl); added++; rrIndex++; }); persist(); renderAll(); alert(`Imported ${added} leads with control checks`); } catch(err){ alert('Import error: '+err.message); } }; reader.readAsText(file); }
+
+/* Seed demo if empty */
+if(leads.length===0){
+  const demo=[
+    {id:'L1',name:'Vikram Patel',phone:'9876543210',email:'vikram.p@gmail.com',model:'450X',source:'Walk-in',score:'hot',execId:'e1',status:'Test Ride Scheduled',follow:todayStr(),trdate:nowLocal(),location:'Sukher, Udaipur',notes:'Interested in 450X HR, exchange Pulsar',created:new Date(Date.now()-1000*60*25).toISOString()},
+    {id:'L2',name:'Anjali Jain',phone:'8765432109',email:'',model:'Rizta Z',source:'Website',score:'warm',execId:'e2',status:'New',follow:todayStr(),location:'Hiran Magri',notes:'Family scooter need',created:new Date(Date.now()-1000*60*35).toISOString()},
+    {id:'L3',name:'Suresh Menon',phone:'7654321098',email:'suresh.m@hotmail.com',model:'Rizta S',source:'Instagram',score:'cold',execId:'e3',status:'Connected',follow:(()=>{const d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]})(),location:'Udaipur',notes:'Asked for EMI',created:new Date(Date.now()-1000*60*60*5).toISOString()},
+    {id:'L4',name:'Rahul Sharma',phone:'9988776655',email:'rahul.sh@gmail.com',model:'450X',source:'Referral',score:'hot',execId:'e1',status:'Booking Done',follow:todayStr(),location:'Fatehpura',notes:'Booking done, finance pending',created:new Date(Date.now()-1000*60*60*26).toISOString()},
+    {id:'L5',name:'Priya Kumawat',phone:'9123456780',email:'',model:'450S',source:'Google Ads',score:'warm',execId:'e2',status:'Test Ride Done',follow:todayStr(),location:'Shobhagpura',notes:'Loved pickup, price concern',created:new Date(Date.now()-1000*60*120).toISOString()},
+  ];
+  leads=demo; persist();
+}
+renderAll();
+
+// periodic SLA check
+setInterval(()=>{ renderDashboard(); }, 60000);
+</script>
+</body>
+</html>
