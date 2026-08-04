@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>📒 Showroom Account Book — Customer Payment Manager</title>
+<style>
+:root{--pri:#4f46e5;--pri2:#312e81}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#eef2f7;color:#0f172a}
+header{position:sticky;top:0;background:linear-gradient(90deg,var(--pri2),var(--pri));color:#fff;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:50}
+@media (max-width:760px){header #globalSearchWrap,header > div[style*="margin-left:auto"]{max-width:100%;flex-basis:100%}}
+.brand{font-size:17px;font-weight:800;margin-right:14px;white-space:nowrap}
+.brand small{display:block;font-size:10px;font-weight:400;opacity:.85}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{background:rgba(255,255,255,.15);border:none;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px}
+.tab:hover{background:rgba(255,255,255,.28)}
+.tab.active{background:#fff;color:var(--pri2);font-weight:700}
+main{max-width:1200px;margin:18px auto;padding:0 14px 40px}
+.card{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(15,23,42,.08);margin-bottom:16px}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(205px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+label{font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.3px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;background:#fff;margin-top:3px}
+input:focus,select:focus{outline:2px solid #818cf8;border-color:transparent}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+th{background:#eef2f7;color:#334155;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+tr:hover td{background:#f8fafc}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.btn{padding:8px 16px;border-radius:8px;border:1px solid transparent;cursor:pointer;font-size:14px;font-weight:700;background:#e2e8f0}
+.primary{background:var(--pri);color:#fff}.primary:hover{background:#4338ca}
+.ghost{background:#f1f5f9;color:#0f172a;border-color:#cbd5e1}.ghost:hover{background:#e2e8f0}
+.danger{background:#fee2e2;color:#b91c1c}.danger:hover{background:#fecaca}
+.green{background:#16a34a;color:#fff}
+.sm{padding:4px 9px;font-size:12px}
+.badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.b-paid{background:#dcfce7;color:#15803d}.b-part{background:#fef3c7;color:#b45309}.b-due{background:#fee2e2;color:#b91c1c}.b-adv{background:#e0e7ff;color:#4338ca}
+.stat .v{font-size:24px;font-weight:800;margin-top:4px}
+.stat .l{font-size:11px;color:#64748b;text-transform:uppercase;font-weight:700}
+.stat{border-left:4px solid var(--pri)}
+.stat.red{border-color:#dc2626}.stat.green{border-color:#16a34a}.stat.amber{border-color:#d97706}.stat.blue{border-color:#2563eb}
+.section-t{font-weight:800;font-size:15px;margin:2px 0 12px;color:var(--pri2);border-bottom:2px solid #e0e7ff;padding-bottom:6px}
+.chip{display:inline-block;background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;border-radius:999px;padding:4px 11px;font-size:12px;margin:2px;font-weight:600}
+.tblwrap{overflow-x:auto}
+.muted{color:#64748b;font-size:12px}
+.hbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.totrow td{background:#eef2ff;font-weight:800;color:var(--pri2)}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 20px;border-radius:8px;opacity:0;transition:.3s;pointer-events:none;z-index:99;font-size:14px}
+#printArea #psheet{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#printArea{display:none;font-family:'Segoe UI',Arial,sans-serif;color:#000}
+@media print{
+  header,main,#toast{display:none!important}
+  #printArea{display:block}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span id="brandName">📒 Showroom Account Book</span><small id="brandLine">Customer Account &amp; Payment Manager (Offline)</small></div>
+  <nav class="tabs">
+    <button class="tab" data-v="dashboard" onclick="go('dashboard')">🏠 Dashboard</button>
+    <button class="tab" data-v="customers" onclick="go('customers')">👥 Customers</button>
+    <button class="tab" data-v="new" onclick="go('new')">➕ New Account</button>
+    <button class="tab" data-v="reports" onclick="go('reports')">📅 Month Report</button>
+    <button class="tab" data-v="settings" onclick="go('settings')">🎨 Settings</button>
+    <button class="tab" data-v="masters" onclick="go('masters')">⚙️ Masters</button>
+    <button class="tab" data-v="backup" onclick="go('backup')">💾 Backup / Export</button>
+  </nav>
+  <div style="position:relative;flex:1;min-width:200px;max-width:340px;margin-left:auto">
+   <input id="globalSearch" placeholder="🔍 Global Search: Name / Mobile / Frame / Invoice / Challan / Model..." autocomplete="off"
+    style="margin:0;background:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.4)"
+    oninput="globalSearchInput()" onkeydown="globalSearchKey(event)" onfocus="globalSearchInput()">
+   <div id="globalSearchResults" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.25);max-height:360px;overflow-y:auto;z-index:200;color:#0f172a"></div>
+  </div>
+</header>
+<main id="view"></main>
+<div id="printArea"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ================= STORAGE ENGINE (IndexedDB + localStorage mirror) =================
+   Primary DB : IndexedDB "sab_db_v1" — separate, high-capacity, non-blocking database.
+   Mirror     : localStorage "sab_state_v1" — instant-read safety copy, used only if
+                IndexedDB is unavailable (very old browser / some private modes) or fails.
+   Every existing save()/state call in this app is untouched — only the engine under it changed. */
+const LS_KEY='sab_state_v1';
+const IDB_NAME='sab_db_v1';
+const IDB_STORE='kv';
+const IDB_ROW='state';
+const $=s=>document.querySelector(s);
+const DEFAULT_MODELS=['TVS iQube','TVS iQube S','TVS Jupiter 125','TVS Jupiter 110','TVS NTorq 125','TVS Raider 125','TVS Apache RTR 160 2V','TVS Apache RTR 160 4V','TVS Apache RTR 200 4V','TVS Ronin','TVS Radeon','TVS Sport','TVS XL 100','TVS Zest 110','TVS Star City Plus'];
+const DEFAULT_FINS=['TVS Credit','Bajaj Finserv','IDFC First Bank','HDFC Bank','Kotak Mahindra','Cholamandalam','Hero FinCorp','ICICI Bank','SBI','Poonawalla Fincorp','Muthoot Finance','Self / Cash'];
+let state={customers:[]};
+let _idb=null;          /* open IndexedDB handle, or null if unavailable */
+let _idbOK=false;       /* true once we know IndexedDB is usable */
+let _saveTimer=null;    /* debounce handle so rapid clicks don't spam writes */
+
+function _emptyState(){return {customers:[]}}
+function _parseState(raw){
+ try{ if(!raw)return null; const st=JSON.parse(raw); if(!Array.isArray(st.customers))st.customers=[]; return st; }
+ catch(e){ return null; }
+}
+function _lsRead(){ try{ return _parseState(localStorage.getItem(LS_KEY)); }catch(e){ return null; } }
+function _lsWrite(){ try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); return true; }catch(e){ return false; } }
+
+function _idbOpen(){
+ return new Promise(resolve=>{
+  if(!('indexedDB' in window)){ resolve(null); return }
+  let req;
+  try{ req=indexedDB.open(IDB_NAME,1); }catch(e){ resolve(null); return }
+  req.onupgradeneeded=()=>{ try{ req.result.createObjectStore(IDB_STORE); }catch(e){} };
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>resolve(null);
+  req.onblocked=()=>resolve(null);
+ });
+}
+function _idbRead(db){
+ return new Promise(resolve=>{
+  try{
+   const tx=db.transaction(IDB_STORE,'readonly');
+   const rq=tx.objectStore(IDB_STORE).get(IDB_ROW);
+   rq.onsuccess=()=>resolve(rq.result!=null?rq.result:null);
+   rq.onerror=()=>resolve(null);
+  }catch(e){ resolve(null); }
+ });
+}
+function _idbWrite(db,data){
+ return new Promise(resolve=>{
+  try{
+   const tx=db.transaction(IDB_STORE,'readwrite');
+   tx.objectStore(IDB_STORE).put(data,IDB_ROW);
+   tx.oncomplete=()=>resolve(true);
+   tx.onerror=()=>resolve(false);
+   tx.onabort=()=>resolve(false);
+  }catch(e){ resolve(false); }
+ });
+}
+
+/* save(): keeps the exact same name/signature every part of this app already calls.
+   Writes to BOTH stores — IndexedDB (primary) and localStorage (fast mirror/fallback) —
+   so a full account book is never resting in only one place. Debounced so fast repeated
+   edits (typing, multiple clicks) collapse into one actual write shortly after the last one. */
+function save(){
+ _lsWrite();                       /* instant, synchronous mirror — cheap safety net */
+ clearTimeout(_saveTimer);
+ _saveTimer=setTimeout(()=>{
+  if(_idbOK&&_idb){ const snapshot=JSON.parse(JSON.stringify(state)); _idbWrite(_idb,snapshot); }
+ },120);
+}
+function saveNow(){ /* used before actions that leave the page (e.g. window.print) */
+ _lsWrite();
+ clearTimeout(_saveTimer);
+ if(_idbOK&&_idb) return _idbWrite(_idb,JSON.parse(JSON.stringify(state)));
+ return Promise.resolve(false);
+}
+
+function migrate(){
+ let d=false;
+ if(!state.masters)state.masters={};
+ if(!Array.isArray(state.masters.models)){state.masters.models=DEFAULT_MODELS.slice();d=true}
+ if(!Array.isArray(state.masters.financiers)){state.masters.financiers=DEFAULT_FINS.slice();d=true}
+ if(!state.settings)state.settings={};
+ const SD={firmName:'📒 Showroom Account Book',firmLine:'Customer Account & Payment Manager (Offline)',firmPhone:'',firmAddress:'',bankName:'',accountNo:'',ifsc:'',branch:'',upiId:'',themeColor:'#4f46e5',printHeadColor:'#312e81',printAccColor:'#e0e7ff',colorPrint:'yes',footerNote:''};
+ Object.keys(SD).forEach(k=>{if(state.settings[k]==null){state.settings[k]=SD[k];d=true}});
+ if(d)save();
+}
+
+/* Boot sequence: try IndexedDB first (separate, larger, non-blocking store).
+   If it has data, use it. If it's empty but localStorage has older data, adopt that
+   into IndexedDB (one-time upgrade path so nobody's existing data seems to vanish).
+   If IndexedDB can't be opened at all, run on the localStorage mirror alone. */
+async function _bootStorage(){
+ const db=await _idbOpen();
+ if(db){
+  _idb=db; _idbOK=true;
+  const loaded=await _idbRead(db);
+  if(loaded&&typeof loaded==='object'&&Array.isArray(loaded.customers)){
+   state=loaded;
+  }else{
+   const fromLs=_lsRead();
+   state=fromLs||_emptyState();
+   await _idbWrite(db,JSON.parse(JSON.stringify(state))); /* seed IndexedDB from the mirror/default so both stores agree */
+  }
+ }else{
+  _idbOK=false;
+  state=_lsRead()||_emptyState();
+ }
+ migrate();
+}
+function applyBrand(){const n=document.getElementById('brandName'),l=document.getElementById('brandLine');const S=state.settings||{};
+ if(n)n.textContent=S.firmName||'📒 Showroom Account Book';if(l)l.textContent=S.firmLine||'Customer Account & Payment Manager (Offline)'}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function num(v){const n=parseFloat(v);return isNaN(n)?0:n}
+function rupee(n){n=num(n);const neg=n<0;return (neg?'- ':'')+'₹'+Math.abs(n).toLocaleString('en-IN',{maximumFractionDigits:2})}
+function dstr(iso){if(!iso)return '—';const p=iso.split('-');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:iso}
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function toast(m){const t=$('#toast');t.textContent=m;t.style.opacity=1;setTimeout(()=>t.style.opacity=0,2200)}
+
+/* ================= CONFIG ================= */
+const MODES=[
+ ['Cash','Cash'],
+ ['Card','Card'],
+ ['Bank Cheque/DD','Bank Cheque / DD'],
+ ['NEFT/RTGS','NEFT / RTGS'],
+ ['Scan Pay/UPI','Scan Pay (UPI)'],
+ ['Advance','Advance'],
+ ['Finance','Finance (Loan Amt)'],
+ ['Credit Note','Credit Note'],
+ ['Short Payment','Short Payment / Write-off']
+];
+const FINSTATUS=['','Applied','Approved','Disbursed','Rejected','Closed'];
+const BILL_FIELDS=[
+ ['exShowroom','Ex Showroom'],
+ ['pmEDrive','PM E-Drive Scheme  (–)'],
+ ['priceReduction','Price Reduction  (–)'],
+ ['schemeDiscount','Scheme Discount  (–)'],
+ ['rto','RTO  (+)'],
+ ['insurance','Insurance  (+)'],
+ ['accessories','Accessories  (+)'],
+ ['accessoriesKit2','Accessories Kit 2  (+)'],
+ ['ebw','EBW  (+)'],
+ ['ecw','ECW  (+)'],
+ ['proPack','Pro Pack  (+)'],
+ ['teflon','Teflon Coating  (+)'],
+ ['rsa','RSA  (+)'],
+ ['hpn','HPN  (+)'],
+ ['logistics','Logistics  (+)'],
+ ['other','Other  (+)'],
+ ['discount','Discount  (–)']
+];
+function calcBill(b){b=b||{};const n=k=>num(b[k]);
+ const eff=n('exShowroom')-n('pmEDrive')-n('priceReduction')-n('schemeDiscount');
+ const adds=['rto','insurance','accessories','accessoriesKit2','ebw','ecw','proPack','teflon','rsa','hpn','logistics','other'].reduce((s,k)=>s+n(k),0);
+ return {eff:eff,total:eff+adds-n('discount')};}
+function calcPay(c){const mt={};MODES.forEach(m=>mt[m[0]]=0);let rec=0;
+ (c.payments||[]).forEach(p=>{if(mt[p.mode]==null)mt[p.mode]=0;mt[p.mode]+=num(p.amount);rec+=num(p.amount)});
+ return {mt:mt,rec:rec};}
+function totals(c){const b=calcBill(c.billing);const p=calcPay(c);return {eff:b.eff,total:b.total,rec:p.rec,bal:b.total-p.rec,mt:p.mt}}
+function statusOf(c){const t=totals(c);if(t.total<=0)return['b-due','—'];if(t.bal<0)return['b-adv','ADVANCE'];if(t.bal===0)return['b-paid','PAID'];if(t.rec>0)return['b-part','PARTIAL'];return['b-due','DUE']}
+function findC(id){return state.customers.find(c=>c.id===id)}
+
+
+/* ================= SETTINGS & THEME ================= */
+const MCOLORS={'Cash':'#16a34a','Card':'#2563eb','Bank Cheque/DD':'#d97706','NEFT/RTGS':'#0d9488','Scan Pay/UPI':'#7c3aed','Advance':'#db2777','Finance':'#4f46e5','Credit Note':'#64748b','Short Payment':'#dc2626'};
+function modeBadge(m){const col=MCOLORS[m]||'#334155';return `<span style="background:${col};color:#fff;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap">${esc(m)}</span>`}
+function colorChips(mt){return MODES.filter(m=>num(mt[m[0]])>0).map(m=>{const col=MCOLORS[m[0]]||'#334155';return `<span class="chip" style="background:${col};color:#fff;border-color:${col}">${m[1]}: <b>${rupee(mt[m[0]])}</b></span>`}).join('')}
+function darken(h,f){h=(h||'#4f46e5').replace('#','');if(h.length!==6)return '#4f46e5';const n=v=>Math.max(0,Math.min(255,Math.round(v*f)));return '#'+[0,2,4].map(i=>n(parseInt(h.substr(i,2),16)).toString(16).padStart(2,'0')).join('')}
+function applyTheme(){const S=state.settings||{};const c=S.themeColor||'#4f46e5';document.documentElement.style.setProperty('--pri',c);document.documentElement.style.setProperty('--pri2',darken(c,0.72))}
+function resetTheme(){const S=state.settings;S.themeColor='#4f46e5';S.printHeadColor='#312e81';S.printAccColor='#e0e7ff';S.colorPrint='yes';save();applyTheme();renderSettings(document.getElementById('view'));toast('Colours default par aa gaye ✔')}
+function renderSettings(v){
+ const st=state.settings||{};
+ v.innerHTML=`
+ <div class="card">
+  <div class="section-t">🏪 Showroom Details <span class="muted">(Heading + Print par dikhega)</span></div>
+  <div class="grid g4">
+   <div><label>Showroom / Firm Name (MAIN HEADING)</label><input id="s_firmName" value="${esc(st.firmName)}" placeholder="e.g. Shree Motors - TVS"></div>
+   <div><label>Heading ke neeche wali line</label><input id="s_firmLine" value="${esc(st.firmLine)}"></div>
+   <div><label>Showroom Phone</label><input id="s_firmPhone" value="${esc(st.firmPhone)}" placeholder="98XXXXXX10"></div>
+   <div><label>Showroom Address (Print par)</label><input id="s_firmAddress" value="${esc(st.firmAddress)}"></div>
+  </div>
+ </div>
+ <div class="card">
+  <div class="section-t">🏦 Bank Details <span class="muted">(Print Statement par "Payment ke liye" box me dikhega)</span></div>
+  <div class="grid g4">
+   <div><label>Bank Name</label><input id="s_bankName" value="${esc(st.bankName)}" placeholder="e.g. State Bank of India"></div>
+   <div><label>Account No</label><input id="s_accountNo" value="${esc(st.accountNo)}"></div>
+   <div><label>IFSC Code</label><input id="s_ifsc" value="${esc(st.ifsc)}" placeholder="e.g. SBIN0001234"></div>
+   <div><label>Branch</label><input id="s_branch" value="${esc(st.branch)}"></div>
+   <div><label>UPI ID</label><input id="s_upiId" value="${esc(st.upiId)}" placeholder="e.g. shreemotors@okhdfc"></div>
+  </div>
+ </div>
+ <div class="card">
+  <div class="section-t">🎨 Colour &amp; Print Design <span class="muted">(App + Statement dono ka look)</span></div>
+  <div class="grid g4">
+   <div><label>App Theme Colour (header/buttons)</label><input id="s_themeColor" type="color" value="${st.themeColor||'#4f46e5'}" style="height:38px;padding:2px"></div>
+   <div><label>Print Header Banner Colour</label><input id="s_printHeadColor" type="color" value="${st.printHeadColor||'#312e81'}" style="height:38px;padding:2px"></div>
+   <div><label>Print Table Header Colour</label><input id="s_printAccColor" type="color" value="${st.printAccColor||'#e0e7ff'}" style="height:38px;padding:2px"></div>
+   <div><label>Print Style</label><select id="s_colorPrint"><option value="yes" ${st.colorPrint!=='no'?'selected':''}>🌈 Colourful Print (recommended)</option><option value="no" ${st.colorPrint==='no'?'selected':''}>⚫ Simple Black &amp; White (ink bachao)</option></select></div>
+   <div style="grid-column:span 2"><label>Print ke sabse neeche Note / Terms (optional)</label><input id="s_footerNote" value="${esc(st.footerNote)}" placeholder="e.g. Thank you! Visit again. | E&OE"></div>
+  </div>
+  <br>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+   <button class="btn primary" onclick="saveSettings()">💾 Save Settings</button>
+   <button class="btn ghost" onclick="resetTheme()">↩️ Colours Default par Lao</button>
+  </div>
+  <div class="muted" style="margin-top:8px">💡 🌈 Colourful print ke liye browser ke print dialog me <b>"Background graphics"</b> ON rakhein (Chrome me: More Settings → Background graphics ✔).</div>
+ </div>`;
+}
+
+/* ================= GLOBAL SEARCH (header) ================= */
+let _gsIndex=-1;
+function globalSearchMatches(q){
+ q=(q||'').trim().toLowerCase();
+ if(!q)return [];
+ return state.customers.filter(c=>[c.name,c.mobile,c.frameNo,c.invoiceNo,c.challanNo,c.model,c.ledgerName,c.policyNo]
+  .join(' ').toLowerCase().includes(q)).slice(0,20);
+}
+function globalSearchInput(){
+ const box=$('#globalSearchResults');
+ const q=$('#globalSearch').value;
+ _gsIndex=-1;
+ if(!q.trim()){box.style.display='none';box.innerHTML='';return}
+ const list=globalSearchMatches(q);
+ if(!list.length){
+  box.innerHTML='<div class="muted" style="padding:12px 14px">Koi match nahi mila</div>';
+ }else{
+  box.innerHTML=list.map((c,i)=>{const t=totals(c);const st=statusOf(c);
+   return `<div class="gs-row" data-i="${i}" onclick="globalSearchGo('${c.id}')"
+     style="padding:9px 14px;cursor:pointer;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;gap:10px">
+    <div>
+     <div style="font-weight:700">${esc(c.name)}</div>
+     <div class="muted">${esc(c.mobile||'')}${c.model?' • '+esc(c.model):''}${c.frameNo?' • '+esc(c.frameNo):''}</div>
+    </div>
+    <div style="text-align:right;white-space:nowrap">
+     <span class="badge ${st[0]}">${st[1]}</span>
+     <div class="muted" style="margin-top:2px">${rupee(t.bal)} bal</div>
+    </div>
+   </div>`}).join('');
+  _gsList=list;
+ }
+ box.style.display='block';
+}
+let _gsList=[];
+function globalSearchGo(id){
+ $('#globalSearch').value='';
+ $('#globalSearchResults').style.display='none';
+ $('#globalSearchResults').innerHTML='';
+ go('detail',id);
+}
+function globalSearchKey(e){
+ const box=$('#globalSearchResults');
+ if(box.style.display==='none')return;
+ const rows=box.querySelectorAll('.gs-row');
+ if(e.key==='ArrowDown'){e.preventDefault();_gsIndex=Math.min(_gsIndex+1,rows.length-1);globalSearchHighlight(rows)}
+ else if(e.key==='ArrowUp'){e.preventDefault();_gsIndex=Math.max(_gsIndex-1,0);globalSearchHighlight(rows)}
+ else if(e.key==='Enter'){e.preventDefault();
+  const pick=_gsIndex>=0&&_gsList[_gsIndex]?_gsList[_gsIndex]:_gsList[0];
+  if(pick)globalSearchGo(pick.id);
+ }else if(e.key==='Escape'){$('#globalSearch').value='';box.style.display='none';box.innerHTML=''}
+}
+function globalSearchHighlight(rows){
+ rows.forEach((r,i)=>r.style.background=i===_gsIndex?'#eef2ff':'');
+ if(rows[_gsIndex])rows[_gsIndex].scrollIntoView({block:'nearest'});
+}
+document.addEventListener('click',e=>{
+ const wrap=$('#globalSearchResults');
+ if(!wrap)return;
+ if(e.target.id!=='globalSearch'&&!wrap.contains(e.target)){wrap.style.display='none'}
+});
+
+/* ================= ROUTER ================= */
+let route={view:'dashboard',id:null};
+function go(view,id){route={view:view,id:id||null};render();window.scrollTo(0,0)}
+function render(){
+ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===(route.view==='edit'?'new':route.view==='detail'?'customers':route.view)));
+ const v=$('#view');
+ if(route.view==='dashboard')renderDashboard(v);
+ else if(route.view==='customers')renderCustomers(v);
+ else if(route.view==='new')renderForm(v,null);
+ else if(route.view==='edit')renderForm(v,route.id);
+ else if(route.view==='detail')renderDetail(v,route.id);
+ else if(route.view==='reports')renderReports(v);
+ else if(route.view==='settings')renderSettings(v);
+ else if(route.view==='masters')renderMasters(v);
+ else if(route.view==='backup')renderBackup(v);
+}
+
+/* ================= DASHBOARD ================= */
+function renderDashboard(v){
+ let sT=0,sR=0,sD=0,todayCol=0;const td=todayISO();
+ state.customers.forEach(c=>{const t=totals(c);sT+=t.total;sR+=t.rec;if(t.bal>0)sD+=t.bal;
+  (c.payments||[]).forEach(p=>{if(p.date===td)todayCol+=num(p.amount)})});
+ const recent=[];state.customers.forEach(c=>(c.payments||[]).forEach(p=>recent.push({c:c,p:p})));
+ recent.sort((a,b)=>(b.p.date||'').localeCompare(a.p.date||''));
+ const pending=state.customers.filter(c=>totals(c).bal>0).sort((a,b)=>totals(b).bal-totals(a).bal);
+ v.innerHTML=`
+ <div class="grid g4">
+  <div class="card stat blue"><div class="l">Total Customers</div><div class="v">${state.customers.length}</div></div>
+  <div class="card stat"><div class="l">Total Billing (Sale)</div><div class="v">${rupee(sT)}</div></div>
+  <div class="card stat green"><div class="l">Total Received (Jama)</div><div class="v">${rupee(sR)}</div></div>
+  <div class="card stat red"><div class="l">Total Outstanding (Bakaya)</div><div class="v">${rupee(sD)}</div></div>
+ </div>
+ <div class="card stat amber"><div class="l">Aaj ki Collection (${dstr(td)})</div><div class="v">${rupee(todayCol)}</div></div>
+ <div class="grid g3">
+  <div class="card">
+   <div class="section-t">🧾 Recent Payments (Latest 10)</div>
+   <div class="tblwrap"><table>
+    <tr><th>Date</th><th>Customer</th><th>Mode</th><th class="num">Amount</th></tr>
+    ${recent.slice(0,10).map(r=>`<tr><td>${dstr(r.p.date)}</td><td><a href="#" onclick="go('detail','${r.c.id}');return false">${esc(r.c.name)}</a></td><td>${modeBadge(r.p.mode)}</td><td class="num">${rupee(r.p.amount)}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">Abhi koi payment nahi</td></tr>'}
+   </table></div>
+  </div>
+  <div class="card">
+   <div class="section-t">⚠️ Pending Balance (Bakaya Top 10)</div>
+   <div class="tblwrap"><table>
+    <tr><th>Customer</th><th>Frame No</th><th class="num">Balance</th></tr>
+    ${pending.slice(0,10).map(c=>`<tr><td><a href="#" onclick="go('detail','${c.id}');return false">${esc(c.name)}</a></td><td>${esc(c.frameNo)}</td><td class="num" style="color:#b91c1c;font-weight:700">${rupee(totals(c).bal)}</td></tr>`).join('')||'<tr><td colspan="3" class="muted">Koi bakaya nahi 🎉</td></tr>'}
+   </table></div>
+  </div>
+ </div>
+ <div class="card">
+  <div class="section-t">❓ Kaise Use Karein (Quick Guide)</div>
+  <ol style="font-size:13px;line-height:1.9;color:#334155;margin:0;padding-left:18px">
+   <li><b>➕ New Account</b> me customer ki details + vehicle billing (Ex-Showroom, RTO, Insurance, sabhi charges) bharein — <b>Total Amount automatic calculate</b> hoga.</li>
+   <li>Save karte hi customer ka <b>Account page</b> khulega — wahan <b>"Payment Entry"</b> se date-wise jitni baar bhi payment aaye (Cash / Card / Cheque / UPI / NEFT / Finance) sab add karein.</li>
+   <li>Customer page par <b>Total Billed, Total Received, Net Balance</b> hamesha automatic dikhta hai — koi calculation ki zaroorat nahi.</li>
+   <li><b>🖨️ Print Statement</b> se customer ka full account nikaal sakte hain.</li>
+   <li><b>📅 Month Report</b> tab me mahina chunein — uski sales, collection (mode-wise + day-wise), financier/model report aur 12-mahine ka overview milega, CSV export ke saath.</li>
+   <li><b>🎨 Settings</b> tab me sab customize karein: <b>showroom naam (heading)</b>, <b>bank details/UPI</b>, <b>app theme colour</b>, <b>🌈 colourful print design</b> aur print ke neeche ka note.</li>
+   <li><b>⚙️ Masters</b> tab me apne <b>Vehicle Models</b> aur <b>Finance Companies</b> add/remove karein.</li>
+   <li><b>🏦 Finance/Loan:</b> Account form me loan no, applied/approved amount, down payment, EMI, tenure bharein. Financier ki disbursal <b>"Finance" mode ki Payment Entry (Date + Amount)</b> se aaye — Finance card par "kitna aaya / kitna baaki" auto-dikhega, status bhi change kar sakte hain.</li>
+   <li><b>💾 Backup / Export</b> tab se pura data Excel (CSV) me download karein — bilkul aapke Excel format me. <b>Har hafte backup jarur lein.</b></li>
+  </ol>
+ </div>`;
+}
+
+/* ================= CUSTOMERS LIST ================= */
+function renderCustomers(v){
+ v.innerHTML=`
+ <div class="card">
+  <div class="hbar">
+   <div class="section-t" style="margin:0;border:0">👥 All Customer Accounts <span class="muted">(${state.customers.length})</span></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <input id="q" placeholder="🔍 Name / Mobile / Frame / Invoice search..." style="width:280px;margin:0" oninput="filterList()">
+    <button class="btn ghost sm" onclick="registerCSV()">⬇️ Full Register (Excel CSV)</button>
+    <button class="btn ghost sm" onclick="paymentsCSV()">⬇️ All Payments (CSV)</button>
+    <button class="btn primary sm" onclick="go('new')">➕ New Account</button>
+   </div>
+  </div>
+  <div class="tblwrap"><table id="ctbl">
+   <thead><tr><th>#</th><th>Customer</th><th>Mobile</th><th>Frame No</th><th>Invoice No</th><th class="num">Total Amount</th><th class="num">Received</th><th class="num">Net Balance</th><th>Status</th><th>Action</th></tr></thead>
+   <tbody id="cbody"></tbody>
+  </table></div>
+ </div>`;
+ drawRows(state.customers);
+ window.filterList=function(){
+  const q=$('#q').value.trim().toLowerCase();
+  const list=state.customers.filter(c=>!q||[c.name,c.mobile,c.frameNo,c.invoiceNo,c.challanNo,c.ledgerName].join(' ').toLowerCase().includes(q));
+  drawRows(list);
+ };
+}
+function drawRows(list){
+ let sT=0,sR=0,sB=0;
+ const rows=list.map((c,i)=>{const t=totals(c);const st=statusOf(c);sT+=t.total;sR+=t.rec;sB+=t.bal;
+  return `<tr>
+   <td class="muted">${i+1}</td>
+   <td><a href="#" onclick="go('detail','${c.id}');return false" style="font-weight:700;color:var(--pri2)">${esc(c.name)}</a><div class="muted">${esc(c.model||'')}</div></td>
+   <td>${esc(c.mobile)}</td><td>${esc(c.frameNo)}</td><td>${esc(c.invoiceNo)}</td>
+   <td class="num">${rupee(t.total)}</td><td class="num" style="color:#15803d">${rupee(t.rec)}</td>
+   <td class="num" style="color:${t.bal>0?'#b91c1c':'#15803d'};font-weight:800">${rupee(t.bal)}</td>
+   <td><span class="badge ${st[0]}">${st[1]}</span></td>
+   <td><button class="btn ghost sm" onclick="go('detail','${c.id}')">View</button>
+       <button class="btn ghost sm" onclick="go('edit','${c.id}')">Edit</button>
+       <button class="btn danger sm" onclick="delCustomer('${c.id}')">🗑</button></td>
+  </tr>`}).join('');
+ $('#cbody').innerHTML=(rows||'<tr><td colspan="10" class="muted" style="text-align:center;padding:24px">Koi customer nahi mila. "➕ New Account" se pehla account banayein.</td></tr>')
+  +(list.length?`<tr class="totrow"><td colspan="5">TOTAL (${list.length} customers)</td><td class="num">${rupee(sT)}</td><td class="num">${rupee(sR)}</td><td class="num">${rupee(sB)}</td><td colspan="2"></td></tr>`:'');
+}
+function delCustomer(id){const c=findC(id);if(!c)return;
+ if(!confirm(`"${c.name}" ka pura account (saari payments samet) DELETE ho jayega.\n\nContinue?`))return;
+ state.customers=state.customers.filter(x=>x.id!==id);save();render();toast('Account delete ho gaya');}
+
+/* ================= ACCOUNT FORM (NEW / EDIT) ================= */
+function renderForm(v,id){
+ const c=id?findC(id):null;
+ if(id&&!c){go('customers');return}
+ const b=(c&&c.billing)||{};
+ const f=(k,val)=>`<div><label>${k}</label><input id="f_${val[0]||''}"></div>`;
+ v.innerHTML=`
+ <div class="card">
+  <div class="section-t">${c?'✏️ Edit Account — '+esc(c.name):'➕ New Customer Account'}</div>
+  <div class="section-t" style="color:#334155;font-size:13px">1️⃣ Customer Details</div>
+  <div class="grid g4">
+   <div><label>Customer Name *</label><input id="f_name" value="${esc(c?c.name:'')}"></div>
+   <div><label>Mobile No</label><input id="f_mobile" value="${esc(c?c.mobile:'')}"></div>
+   <div><label>Address</label><input id="f_address" value="${esc(c?c.address:'')}"></div>
+   <div><label>Financier (Finance Company)</label><input id="f_financier" list="finList" value="${esc(c?c.financier:'')}"></div>
+   <div><label>Suggested Ledger Name (Tally)</label><input id="f_ledgerName" placeholder="Khali chhodo to Name hi banega" value="${esc(c?c.ledgerName:'')}"></div>
+   <div><label>Remark / Note</label><input id="f_note" value="${esc(c?c.note:'')}"></div>
+  </div>
+  <br>
+  <div class="section-t" style="color:#334155;font-size:13px">2️⃣ Vehicle &amp; Invoice Details</div>
+  <div class="grid g4">
+   <div><label>Invoice No</label><input id="f_invoiceNo" value="${esc(c?c.invoiceNo:'')}"></div>
+   <div><label>Challan No</label><input id="f_challanNo" value="${esc(c?c.challanNo:'')}"></div>
+   <div><label>Frame No</label><input id="f_frameNo" value="${esc(c?c.frameNo:'')}"></div>
+   <div><label>Policy No</label><input id="f_policyNo" value="${esc(c?c.policyNo:'')}"></div>
+   <div><label>Vehicle Model</label><input id="f_model" list="modList" value="${esc(c?c.model:'')}"></div>
+   <div><label>Sale / Invoice Date</label><input id="f_saleDate" type="date" value="${esc(c?c.saleDate:todayISO())}"></div>
+  </div>
+  <br>
+  <div class="section-t" style="color:#334155;font-size:13px">3️⃣ Finance / Loan Details <span class="muted">(agar gaadi finance se hai — optional)</span></div>
+  <div class="grid g4">
+   <div><label>Loan / Case No</label><input id="f_loanNo" value="${esc((c&&c.finance)?c.finance.loanNo:'')}"></div>
+   <div><label>Finance Applied Amt (kitne ka loan)</label><input id="b_finApplied" type="number" step="0.01" min="0" placeholder="0" value="${(c&&c.finance&&num(c.finance.applied))?c.finance.applied:''}"></div>
+   <div><label>Finance Approved Amt (bank se approved)</label><input id="b_finApproved" type="number" step="0.01" min="0" placeholder="0"value="${(c&&c.finance&&num(c.finance.approved))?c.finance.approved:''}"></div>
+   <div><label>Down Payment (customer ne diya)</label><input id="b_downPayment" type="number" step="0.01" min="0" placeholder="0" value="${(c&&c.finance&&num(c.finance.downPayment))?c.finance.downPayment:''}"></div>
+   <div><label>Monthly EMI</label><input id="b_emi" type="number" step="0.01" min="0" placeholder="0" value="${(c&&c.finance&&num(c.finance.emi))?c.finance.emi:''}"></div>
+   <div><label>Tenure (kitne months)</label><input id="b_tenure" type="number" step="1" min="0" placeholder="0" value="${(c&&c.finance&&num(c.finance.tenure))?c.finance.tenure:''}"></div>
+   <div><label>Finance Status</label><select id="f_finStatus">${FINSTATUS.map(s=>`<option value="${s}" ${((c&&c.finance)?c.finance.status:'')===s?'selected':''}>${s||'— Select —'}</option>`).join('')}</select></div>
+  </div>
+  <div class="muted" style="margin-top:6px">💡 Financier se **disbursal** jab bhi aaye — customer page par <b>Payment Entry</b> me mode <b>"Finance"</b> select karke <b>Date + Amount + Ref</b> se entry karein. Kitna aaya / kitna baaki — Finance card me automatic dikhega.</div>
+  <br>
+  <div class="section-t" style="color:#334155;font-size:13px">4️⃣ Billing Details <span class="muted">(–) wale minus honge, (+) wale add honge</span></div>
+  <div class="grid g4">
+   ${BILL_FIELDS.map(kf=>`<div><label>${kf[1]}</label><input class="billin" id="b_${kf[0]}" type="number" step="0.01" min="0" value="${c?num(b[kf[0]])||'':''}" placeholder="0"></div>`).join('')}
+  </div>
+  <br>
+  <div class="grid g3">
+   <div class="card stat blue" style="margin:0"><div class="l">Effective Ex-Showroom (auto)</div><div class="v" id="liveEff">₹0</div></div>
+   <div class="card stat" style="margin:0"><div class="l">TOTAL AMOUNT (auto)</div><div class="v" id="liveTotal">₹0</div></div>
+   <div class="card" style="margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <button class="btn primary" onclick="saveAccount(${c?("'"+c.id+"'"):'null'})">💾 Save Account</button>
+    <button class="btn ghost" onclick="go(${c?("'detail','"+c.id+"'"):"'customers'"})">Cancel</button>
+   </div>
+  </div>
+  <div class="muted" style="margin-top:8px">💡 Payments yahan nahi — account save karne ke baad customer page par <b>date-wise payment entries</b> add hongi.</div>
+ </div>
+ <datalist id="finList">${masterOptions('financiers','financier')}</datalist>
+ <datalist id="modList">${masterOptions('models','model')}</datalist>`;
+ document.querySelectorAll('.billin').forEach(i=>i.addEventListener('input',liveCalc));
+ liveCalc();
+}
+function readBill(){const b={};BILL_FIELDS.forEach(kf=>b[kf[0]]=num($('#b_'+kf[0]).value));return b}
+function liveCalc(){const t=calcBill(readBill());$('#liveEff').textContent=rupee(t.eff);$('#liveTotal').textContent=rupee(t.total)}
+function saveAccount(id){
+ const name=$('#f_name').value.trim();
+ if(!name){alert('⚠️ Customer Name zaroori hai!');return}
+ const data={
+  name:name,
+  mobile:$('#f_mobile').value.trim(),
+  address:$('#f_address').value.trim(),
+  financier:$('#f_financier').value.trim(),
+  ledgerName:$('#f_ledgerName').value.trim()||name,
+  note:$('#f_note').value.trim(),
+  invoiceNo:$('#f_invoiceNo').value.trim(),
+  challanNo:$('#f_challanNo').value.trim(),
+  frameNo:$('#f_frameNo').value.trim(),
+  policyNo:$('#f_policyNo').value.trim(),
+  model:$('#f_model').value.trim(),
+  saleDate:$('#f_saleDate').value,
+  billing:readBill(),
+  finance:{loanNo:$('#f_loanNo').value.trim(),applied:num($('#b_finApplied').value),approved:num($('#b_finApproved').value),downPayment:num($('#b_downPayment').value),emi:num($('#b_emi').value),tenure:num($('#b_tenure').value),status:$('#f_finStatus').value}
+ };
+ if(id){const c=findC(id);Object.assign(c,data);save();toast('Account update ho gaya ✔');go('detail',id);}
+ else{const c=Object.assign({id:uid(),createdAt:todayISO(),payments:[]},data);state.customers.unshift(c);save();toast('Naya account ban gaya ✔ — ab payment entry karein');go('detail',c.id);}
+}
+
+/* ================= CUSTOMER DETAIL ================= */
+function renderDetail(v,id){
+ const c=findC(id);if(!c){go('customers');return}
+ const t=totals(c);const st=statusOf(c);
+ const pays=(c.payments||[]).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+ const chips=colorChips(t.mt);
+ /* ---- Finance / Disbursal card ---- */
+ const fin=c.finance||{};
+ const finPays=(c.payments||[]).filter(p2=>p2.mode==='Finance').sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+ const finRec=finPays.reduce((s,p2)=>s+num(p2.amount),0);
+ const finExpect=num(fin.approved)||num(fin.applied);
+ const finPend=finExpect>0?finExpect-finRec:0;
+ const hasFin=c.financier||fin.loanNo||finExpect>0||finRec>0||fin.status;
+ const finCard=hasFin?`
+ <div class="card">
+  <div class="hbar">
+   <div class="section-t" style="margin:0;border:0">🏦 Finance / Loan &amp; Disbursal Details ${fin.status?`<span class="badge ${fin.status==='Disbursed'||fin.status==='Closed'?'b-paid':fin.status==='Rejected'?'b-due':'b-part'}">${esc(fin.status).toUpperCase()}</span>`:''}</div>
+   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <label style="margin:0">Status:</label>
+    <select onchange="setFinStatus('${c.id}',this.value)" style="margin:0;width:auto;padding:5px 8px">${FINSTATUS.map(s=>`<option value="${s}" ${(fin.status||'')===s?'selected':''}>${s||'— Set —'}</option>`).join('')}</select>
+    <button class="btn ghost sm" onclick="go('edit','${c.id}')">✏️ Edit Finance</button>
+   </div>
+  </div>
+  <div class="grid g4" style="font-size:13px">
+   <div><b>Financier:</b> ${esc(c.financier)||'—'}</div>
+   <div><b>Loan/Case No:</b> ${esc(fin.loanNo)||'—'}</div>
+   <div><b>Applied Amt:</b> ${num(fin.applied)?rupee(fin.applied):'—'}</div>
+   <div><b>Approved Amt:</b> ${num(fin.approved)?rupee(fin.approved):'—'}</div>
+   <div><b>Down Payment:</b> ${num(fin.downPayment)?rupee(fin.downPayment):'—'}</div>
+   <div><b>EMI:</b> ${num(fin.emi)?(rupee(fin.emi)+(num(fin.tenure)?(' × '+fin.tenure+' months'):'')):'—'}</div>
+   <div><b>Finance se Aaya (Disbursal):</b> <span style="color:#15803d;font-weight:800">${rupee(finRec)}</span></div>
+   <div><b>Disbursal Baaki:</b> ${finExpect>0?`<span style="color:${finPend>0?'#b91c1c':'#15803d'};font-weight:800">${rupee(finPend)}${finPend<=0?' ✔ FULL':''}</span>`:'—'}</div>
+  </div>
+  ${finPays.length?`<div class="tblwrap" style="margin-top:10px"><table>
+   <tr><th>Disbursal Date</th><th class="num">Amount (₹)</th><th>Ref / UTR</th><th>Note</th></tr>
+   ${finPays.map(p2=>`<tr><td>${dstr(p2.date)}</td><td class="num" style="color:#15803d;font-weight:700">${rupee(p2.amount)}</td><td>${esc(p2.ref)||'—'}</td><td>${esc(p2.note)||'—'}</td></tr>`).join('')}
+   <tr class="totrow"><td>Total Disbursed (${finPays.length})</td><td class="num">${rupee(finRec)}</td><td colspan="2"></td></tr>
+  </table></div>`:`<div class="muted" style="margin-top:8px">💡 Financier se abhi koi disbursal entry nahi. Neeche <b>"New Payment Entry"</b> me mode <b>Finance</b> select karke <b>Date + Amount</b> likhein — wo yahan automatically list hogi.</div>`}
+ </div>`:`<div class="card" style="background:#f8fafc;font-size:13px">🏦 <b>Finance/Loan ka case nahi hai?</b> <a href="#" onclick="go('edit','${c.id}');return false">Edit Account</a> par jaakar Finance Details (loan no, applied/approved amount, EMI, tenure) bhar sakte hain — aur disbursal ko <b>"Finance"</b> mode ki payment entry se date-wise track karein.</div>`;
+ const billRows=BILL_FIELDS.map(kf=>{const val=num(c.billing[kf[0]]);return val?`<tr><td>${kf[1].replace(/\(.\)/,'')}</td><td class="num">${rupee(val)}</td></tr>`:''}).join('');
+ v.innerHTML=`
+ <div class="card">
+  <div class="hbar">
+   <div>
+    <div style="font-size:20px;font-weight:800">${esc(c.name)} <span class="badge ${st[0]}">${st[1]}</span></div>
+    <div class="muted">📞 ${esc(c.mobile)||'—'} &nbsp;|&nbsp; 🏠 ${esc(c.address)||'—'} &nbsp;|&nbsp; 🏍️ ${esc(c.model)||'—'} <a href="#" onclick="quickChange('${c.id}','model');return false" title="Model change karein">✏️</a> &nbsp;|&nbsp; Sale Date: ${dstr(c.saleDate)}</div>
+   </div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn ghost sm" onclick="go('customers')">← Back</button>
+    <button class="btn ghost sm" onclick="go('edit','${c.id}')">✏️ Edit</button>
+    <button class="btn primary sm" onclick="printStatement('${c.id}')">🖨️ Print Statement</button>
+   </div>
+  </div>
+  <div class="grid g3" style="font-size:13px">
+   <div><b>Invoice No:</b> ${esc(c.invoiceNo)||'—'} &nbsp; <b>Challan No:</b> ${esc(c.challanNo)||'—'}</div>
+   <div><b>Frame No:</b> ${esc(c.frameNo)||'—'} &nbsp; <b>Policy No:</b> ${esc(c.policyNo)||'—'}</div>
+   <div><b>Financier:</b> ${esc(c.financier)||'—'} <a href="#" onclick="quickChange('${c.id}','financier');return false" title="Financier change karein">✏️</a> &nbsp; <b>Ledger:</b> ${esc(c.ledgerName)||'—'}</div>
+  </div>
+  ${c.note?`<div class="muted" style="margin-top:6px">📝 ${esc(c.note)}</div>`:''}
+ </div>
+
+ ${finCard}
+
+ <div class="grid g3">
+  <div class="card stat blue"><div class="l">Total Amount (Kitna Bana)</div><div class="v">${rupee(t.total)}</div></div>
+  <div class="card stat green"><div class="l">Total Received (Kitna Aaya)</div><div class="v">${rupee(t.rec)}</div></div>
+  <div class="card stat ${t.bal>0?'red':'green'}"><div class="l">Net Balance (Bakaya)</div><div class="v">${rupee(t.bal)}</div></div>
+ </div>
+ ${chips?`<div class="card"><div class="section-t">💰 Mode-wise Collection</div>${chips}</div>`:''}
+
+ <div class="grid g3">
+  <div class="card">
+   <div class="section-t">🧾 Billing Breakup</div>
+   <div class="tblwrap"><table>
+    <tr><th>Particulars</th><th class="num">Amount</th></tr>
+    <tr><td>Ex Showroom</td><td class="num">${rupee(num(c.billing.exShowroom))}</td></tr>
+    ${BILL_FIELDS.slice(1,4).map(kf=>num(c.billing[kf[0]])?`<tr><td>${kf[1].replace('(–)','')}</td><td class="num" style="color:#b91c1c">– ${rupee(num(c.billing[kf[0]]))}</td></tr>`:'').join('')}
+    <tr style="background:#eef2ff"><td><b>Effective Ex-Showroom</b></td><td class="num"><b>${rupee(t.eff)}</b></td></tr>
+    ${BILL_FIELDS.slice(4).map(kf=>{const val=num(c.billing[kf[0]]);if(!val)return'';const minus=kf[1].includes('(–)');return `<tr><td>${kf[1].replace(/\s*\(.\)\s*/,'')}</td><td class="num" style="${minus?'color:#b91c1c':''}">${minus?'– ':''}${rupee(val)}</td></tr>`}).join('')}
+    <tr class="totrow"><td>TOTAL AMOUNT</td><td class="num">${rupee(t.total)}</td></tr>
+   </table></div>
+  </div>
+  <div class="card" style="grid-column:span 2">
+   <div class="section-t">💳 Date-wise Payment Entries <span class="muted">(jitni baar payment aaya, sab yahan)</span></div>
+   <div class="tblwrap"><table>
+    <tr><th>Date</th><th>Mode</th><th>Ref / Txn No</th><th>Note</th><th class="num">Amount (₹)</th><th></th></tr>
+    ${pays.map(p=>`<tr><td>${dstr(p.date)}</td><td>${modeBadge(p.mode)}</td><td>${esc(p.ref)||'—'}</td><td>${esc(p.note)||'—'}</td><td class="num" style="color:#15803d;font-weight:700">${rupee(p.amount)}</td><td><button class="btn danger sm" onclick="delPayment('${c.id}','${p.id}')">✖</button></td></tr>`).join('')||'<tr><td colspan="6" class="muted">Abhi koi payment entry nahi hai</td></tr>'}
+    <tr class="totrow"><td colspan="4">Total Received (${pays.length} entries)</td><td class="num">${rupee(t.rec)}</td><td></td></tr>
+    <tr class="totrow"><td colspan="4">Net Balance</td><td class="num" style="color:${t.bal>0?'#b91c1c':'#15803d'}">${rupee(t.bal)}</td><td></td></tr>
+   </table></div>
+   <br>
+   <div class="section-t" style="font-size:13px;color:#334155">➕ New Payment Entry</div>
+   <div class="grid g4" style="align-items:end">
+    <div><label>Date</label><input id="p_date" type="date" value="${todayISO()}"></div>
+    <div><label>Payment Mode</label><select id="p_mode">${MODES.map(m=>`<option value="${m[0]}">${m[1]}</option>`).join('')}</select></div>
+    <div><label>Amount (₹)</label><input id="p_amt" type="number" step="0.01" min="0.01" placeholder="0.00"></div>
+    <div><label>Ref No (Cheque/UTR/UPI Txn)</label><input id="p_ref" placeholder="Cheque No / UPI Ref / UTR"></div>
+    <div><label>Note</label><input id="p_note" placeholder="Optional remark"></div>
+    <div style="display:flex;gap:8px">
+     <button class="btn green" onclick="addPayment('${c.id}')">✔ Save Payment</button>
+     <button class="btn ghost" onclick="fillBalance('${c.id}')">Full Balance</button>
+    </div>
+   </div>
+  </div>
+ </div>`;
+}
+function fillBalance(id){const t=totals(findC(id));if(t.bal>0){$('#p_amt').value=t.bal.toFixed(2)}else{toast('Koi balance nahi — account clear hai')}}
+function addPayment(cid){
+ const c=findC(cid);if(!c)return;
+ const amt=num($('#p_amt').value);const date=$('#p_date').value;
+ if(!date){alert('⚠️ Date select karein');return}
+ if(amt<=0){alert('⚠️ Amount 0 se zyada hona chahiye');return}
+ c.payments.push({id:uid(),date:date,mode:$('#p_mode').value,amount:amt,ref:$('#p_ref').value.trim(),note:$('#p_note').value.trim()});
+ save();toast(rupee(amt)+' ki payment entry ho gayi ✔');renderDetail($('#view'),cid);
+}
+function setFinStatus(id,val){
+ const c=findC(id);if(!c)return;
+ if(!c.finance)c.finance={};c.finance.status=val;save();
+ renderDetail(document.getElementById('view'),id);toast('Finance status: '+(val||'—'));
+}
+function delPayment(cid,pid){
+ const c=findC(cid);if(!c)return;
+ if(!confirm('Ye payment entry delete karein?'))return;
+ c.payments=c.payments.filter(p=>p.id!==pid);save();toast('Payment entry delete ho gayi');renderDetail($('#view'),cid);
+}
+
+/* ================= MASTERS (Models & Financiers) ================= */
+function masterOptions(key,field){const all=new Set(state.masters[key]||[]);state.customers.forEach(c=>{const v=c[field];if(v)all.add(v)});return [...all].map(v=>`<option value="${esc(v)}">`).join('')}
+function renderMasters(v){
+ v.innerHTML=`
+ <div class="grid g3">
+  ${masterCard('models','🏍️ Vehicle Models')}
+  ${masterCard('financiers','🏦 Finance Companies (Financiers)')}
+  <div class="card"><div class="section-t">ℹ️ Info</div>
+   <p style="font-size:13px;line-height:1.9;color:#334155">
+   • Yahan jo bhi <b>Model</b> / <b>Financier</b> add karenge, wo <b>New Account</b> form ke dropdown me turant milne lagega.<br>
+   • Customer ke <b>Detail page</b> par model/financier ke paas ✏️ se quick-change bhi kar sakte hain.<br>
+   • List se kuch hatane se purane customer accounts par <b>koi asar nahi</b> padega — sirf dropdown update hota hai.</p>
+  </div>
+ </div>`;
+}
+function masterCard(key,title){
+ const list=state.masters[key]||[];
+ return `<div class="card">
+  <div class="section-t">${title} <span class="muted">(${list.length})</span></div>
+  <div style="max-height:320px;overflow:auto;padding:2px">
+   ${list.map((m,i)=>`<span class="chip" style="padding-right:5px">${esc(m)} <a href="#" style="color:#b91c1c;font-weight:800;text-decoration:none" onclick="delMaster('${key}',${i});return false" title="List se hatayein">✖</a></span>`).join('')||'<span class="muted">List khali hai</span>'}
+  </div>
+  <div style="display:flex;gap:8px;margin-top:12px">
+   <input id="new_${key}" placeholder="Naya naam likhein..." style="flex:1;margin:0" onkeydown="if(event.key==='Enter'){event.preventDefault();addMaster('${key}')}">
+   <button class="btn primary sm" onclick="addMaster('${key}')">➕ Add</button>
+  </div>
+ </div>`;
+}
+function addMaster(key){
+ const inp=document.getElementById('new_'+key);const val=(inp.value||'').trim();
+ if(!val){toast('⚠️ Pehle naam likhein');return}
+ if(state.masters[key].some(x=>x.toLowerCase()===val.toLowerCase())){toast('Ye naam pehle se list me hai');return}
+ state.masters[key].push(val);state.masters[key].sort((a,b)=>a.localeCompare(b));save();
+ renderMasters(document.getElementById('view'));toast('"'+val+'" add ho gaya ✔ — ab form ke dropdown me milega');
+}
+function delMaster(key,i){
+ const name=state.masters[key][i];
+ if(!confirm('"'+name+'" ko dropdown list se hatayein?\n(Customer accounts par koi asar nahi hoga)'))return;
+ state.masters[key].splice(i,1);save();renderMasters(document.getElementById('view'));toast('List se hata diya gaya');
+}
+function saveSettings(){
+ const S=state.settings;const g=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
+ S.firmName=g('s_firmName')||'📒 Showroom Account Book';
+ S.firmLine=g('s_firmLine');S.firmPhone=g('s_firmPhone');S.firmAddress=g('s_firmAddress');
+ S.bankName=g('s_bankName');S.accountNo=g('s_accountNo');S.ifsc=g('s_ifsc').toUpperCase();S.branch=g('s_branch');S.upiId=g('s_upiId');
+ S.themeColor=g('s_themeColor')||'#4f46e5';S.printHeadColor=g('s_printHeadColor')||'#312e81';S.printAccColor=g('s_printAccColor')||'#e0e7ff';
+ const cp=document.getElementById('s_colorPrint');S.colorPrint=cp?cp.value:'yes';
+ S.footerNote=g('s_footerNote');
+ save();applyBrand();applyTheme();toast('Settings save ho gayi ✔');
+}
+function quickChange(id,field){
+ const c=findC(id);if(!c)return;
+ const label=field==='model'?'Vehicle Model':'Financier (Finance Company)';
+ const val=prompt('Naya '+label+' likhein:',c[field]||'');
+ if(val===null)return;
+ c[field]=val.trim();save();renderDetail(document.getElementById('view'),id);toast(label+' update ho gaya ✔');
+}
+
+/* ================= MONTH-WISE REPORTS ================= */
+let reportYM=todayISO().slice(0,7);
+function ymKey(iso){return (iso||'').slice(0,7)}
+function monthLabel(ym){const p=ym.split('-');return new Date(+p[0],+p[1]-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'})}
+function setMonth(v2){if(v2)reportYM=v2;renderReports(document.getElementById('view'))}
+function renderReports(v){
+ const ym=reportYM;
+ const sales=state.customers.filter(c=>ymKey(c.saleDate)===ym);
+ let sb=0,sr=0,spB=0;sales.forEach(c=>{const t=totals(c);sb+=t.total;sr+=t.rec;spB+=t.bal>0?t.bal:0});
+ const colls=[];state.customers.forEach(c=>(c.payments||[]).forEach(p=>{if(ymKey(p.date)===ym)colls.push({c:c,p:p})}));
+ colls.sort((a,b)=>(a.p.date||'').localeCompare(b.p.date||''));
+ let colTotal=0;const mt={};MODES.forEach(m=>mt[m[0]]=0);
+ colls.forEach(r=>{const a=num(r.p.amount);colTotal+=a;mt[r.p.mode]=(mt[r.p.mode]||0)+a});
+ const day={};colls.forEach(r=>{day[r.p.date]=(day[r.p.date]||0)+num(r.p.amount)});
+ const days=Object.keys(day).sort();
+ const fin={},modl={};
+ sales.forEach(c=>{const t=totals(c);
+  const f2=c.financier||'Self / Cash';if(!fin[f2])fin[f2]={n:0,amt:0};fin[f2].n++;fin[f2].amt+=t.total;
+  const m2=c.model||'Other / Blank';if(!modl[m2])modl[m2]={n:0,amt:0};modl[m2].n++;modl[m2].amt+=t.total});
+ const finRows=Object.keys(fin).sort((a,b)=>fin[b].amt-fin[a].amt).map(k=>`<tr><td>${esc(k)}</td><td class="num">${fin[k].n}</td><td class="num">${rupee(fin[k].amt)}</td></tr>`).join('');
+ const modRows=Object.keys(modl).sort((a,b)=>modl[b].n-modl[a].n).map(k=>`<tr><td>${esc(k)}</td><td class="num">${modl[k].n}</td><td class="num">${rupee(modl[k].amt)}</td></tr>`).join('');
+ const chips=colorChips(mt);
+ const p=ym.split('-');let yy=+p[0],mm=+p[1];const yRows=[];
+ for(let i=0;i<12;i++){const key=yy+'-'+String(mm).padStart(2,'0');let so=0,bi=0,co=0;
+  state.customers.forEach(c=>{if(ymKey(c.saleDate)===key){so++;bi+=totals(c).total}(c.payments||[]).forEach(pp=>{if(ymKey(pp.date)===key)co+=num(pp.amount)})});
+  yRows.push(`<tr style="${key===ym?'background:#eef2ff;font-weight:700':''}"><td>${monthLabel(key)}</td><td class="num">${so||'—'}</td><td class="num">${rupee(bi)}</td><td class="num" style="color:#15803d">${rupee(co)}</td></tr>`);
+  mm--;if(mm===0){mm=12;yy--}}
+ v.innerHTML=`
+ <div class="card">
+  <div class="hbar">
+   <div class="section-t" style="margin:0;border:0">📅 Month-wise Report — <span style="color:#dc2626">${monthLabel(ym)}</span></div>
+   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <label style="align-self:center;margin:0">Month chunein:</label>
+    <input type="month" value="${ym}" onchange="setMonth(this.value)" style="margin:0;width:auto">
+    <button class="btn primary sm" onclick="monthCSV()">⬇️ Month Report (Excel CSV)</button>
+   </div>
+  </div>
+ </div>
+ <div class="grid g4">
+  <div class="card stat blue"><div class="l">Vehicles Sold (is mahine)</div><div class="v">${sales.length}</div></div>
+  <div class="card stat"><div class="l">Month Billing (Sales)</div><div class="v">${rupee(sb)}</div></div>
+  <div class="card stat green"><div class="l">Month Collection (Jama)</div><div class="v">${rupee(colTotal)}</div></div>
+  <div class="card stat red"><div class="l">Is Mahine ki Sales ka Bakaya</div><div class="v">${rupee(spB)}</div></div>
+ </div>
+ ${chips?`<div class="card"><div class="section-t">💰 Month Collection — Mode-wise</div>${chips}</div>`:''}
+ <div class="grid g3">
+  <div class="card">
+   <div class="section-t">🏦 Financier-wise Sales</div>
+   <div class="tblwrap"><table><tr><th>Financier</th><th class="num">Gaadi</th><th class="num">Amount</th></tr>${finRows||'<tr><td colspan="3" class="muted">—</td></tr>'}</table></div>
+  </div>
+  <div class="card">
+   <div class="section-t">🏍️ Model-wise Sales</div>
+   <div class="tblwrap"><table><tr><th>Model</th><th class="num">Gaadi</th><th class="num">Amount</th></tr>${modRows||'<tr><td colspan="3" class="muted">—</td></tr>'}</table></div>
+  </div>
+ </div>
+ <div class="card">
+  <div class="section-t">🧾 Month Sales ki Detail (${sales.length})</div>
+  <div class="tblwrap"><table>
+   <tr><th>Sale Date</th><th>Customer</th><th>Model</th><th>Invoice No</th><th>Financier</th><th class="num">Total</th><th class="num">Received</th><th class="num">Balance</th><th>Status</th></tr>
+   ${sales.map(c=>{const t=totals(c);const st=statusOf(c);return `<tr><td>${dstr(c.saleDate)}</td><td><a href="#" onclick="go('detail','${c.id}');return false" style="font-weight:700;color:var(--pri2)">${esc(c.name)}</a></td><td>${esc(c.model)||'—'}</td><td>${esc(c.invoiceNo)||'—'}</td><td>${esc(c.financier)||'—'}</td><td class="num">${rupee(t.total)}</td><td class="num" style="color:#15803d">${rupee(t.rec)}</td><td class="num" style="color:${t.bal>0?'#b91c1c':'#15803d'};font-weight:700">${rupee(t.bal)}</td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>`}).join('')||'<tr><td colspan="9" class="muted">Is mahine koi sale nahi</td></tr>'}
+  </table></div>
+ </div>
+ <div class="grid g3">
+  <div class="card" style="grid-column:span 2">
+   <div class="section-t">💳 Month Collections (${colls.length} payments) — sabhi customers se jama</div>
+   <div class="tblwrap"><table>
+    <tr><th>Date</th><th>Customer</th><th>Mode</th><th>Ref No</th><th class="num">Amount</th></tr>
+    ${colls.map(r=>`<tr><td>${dstr(r.p.date)}</td><td><a href="#" onclick="go('detail','${r.c.id}');return false" style="font-weight:700">${esc(r.c.name)}</a></td><td>${modeBadge(r.p.mode)}</td><td>${esc(r.p.ref)||'—'}</td><td class="num" style="color:#15803d;font-weight:700">${rupee(r.p.amount)}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">Is mahine koi collection nahi</td></tr>'}
+   </table></div>
+  </div>
+  <div class="card">
+   <div class="section-t">📆 Day-wise Total (cash closing)</div>
+   <div class="tblwrap"><table>
+    <tr><th>Date</th><th class="num">Collection</th></tr>
+    ${days.map(d=>`<tr><td>${dstr(d)}</td><td class="num">${rupee(day[d])}</td></tr>`).join('')||'<tr><td colspan="2" class="muted">—</td></tr>'}
+    <tr class="totrow"><td>Total</td><td class="num">${rupee(colTotal)}</td></tr>
+   </table></div>
+  </div>
+ </div>
+ <div class="card">
+  <div class="section-t">📊 Pichle 12 Mahine ka Overview</div>
+  <div class="tblwrap"><table><tr><th>Mahina</th><th class="num">Vehicles Sold</th><th class="num">Billing</th><th class="num" style="color:#15803d">Collection</th></tr>${yRows.join('')}</table></div>
+ </div>`;
+}
+function monthCSV(){
+ const ym=reportYM;const rows=[['MONTH WISE REPORT','',monthLabel(ym)],[]];
+ const sales=state.customers.filter(c=>ymKey(c.saleDate)===ym);
+ rows.push(['== SALES (Sale Date ke hisaab se) ==']);
+ rows.push(['Customer','Mobile','Model','Sale Date','Invoice No','Frame No','Financier','Total Amount','Received till date','Balance','Status']);
+ let sb=0,sr=0;
+ sales.forEach(c=>{const t=totals(c);const st=statusOf(c);sb+=t.total;sr+=t.rec;
+  rows.push([c.name,c.mobile,c.model,dstr(c.saleDate),c.invoiceNo,c.frameNo,c.financier||'Self/Cash',t.total,t.rec,t.bal,st[1]])});
+ rows.push(['TOTAL SALES ('+sales.length+' gaadi)','','','','','','',sb,sr,sb-sr,'']);
+ rows.push([]);
+ rows.push(['== COLLECTIONS (Payment Date ke hisaab se) ==']);
+ rows.push(['Date','Customer','Mobile','Invoice No','Payment Mode','Reference No','Amount','Note']);
+ let ct=0;
+ state.customers.forEach(c=>(c.payments||[]).forEach(p=>{if(ymKey(p.date)===ym){ct+=num(p.amount);rows.push([dstr(p.date),c.name,c.mobile,c.invoiceNo,p.mode,p.ref,num(p.amount),p.note])}}));
+ rows.push(['TOTAL COLLECTION','','','','','',ct,'']);
+ dl('month-report-'+ym+'.csv',csv(rows));toast('Month report download ho gayi ✔');
+}
+
+/* ================= PRINT STATEMENT ================= */
+function printStatement(id){
+ const c=findC(id);if(!c)return;
+ const t=totals(c);const st=statusOf(c);
+ const pays=(c.payments||[]).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+ const S=state.settings||{};
+ const COLOR=(S.colorPrint||'yes')!=='no';
+ const HC=COLOR?(S.printHeadColor||'#312e81'):'#374151';
+ const ACC=COLOR?(S.printAccColor||'#e0e7ff'):'#e5e7eb';
+ const G=COLOR?'#16a34a':'#000';
+ const R=COLOR?'#dc2626':'#000';
+ const STC={'PAID':'#16a34a','PARTIAL':'#d97706','DUE':'#dc2626','ADVANCE':'#4f46e5'};
+ const fin=c.finance||{};
+ const finPays=(c.payments||[]).filter(p2=>p2.mode==='Finance').sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+ const finRec=finPays.reduce((sm,p2)=>sm+num(p2.amount),0);
+ const finExpect=num(fin.approved)||num(fin.applied);
+ const hasFin=c.financier||fin.loanNo||finExpect>0||finRec>0||fin.status;
+ const finPrint=hasFin?`
+  <h3 class="sech">🏦 Finance / Loan &amp; Disbursal Details</h3>
+  <table class="tb">
+   <tr><td><b>Financier:</b> ${esc(c.financier)||'—'}</td><td><b>Loan/Case No:</b> ${esc(fin.loanNo)||'—'}</td><td><b>Status:</b> ${esc(fin.status)||'—'}</td></tr>
+   <tr><td><b>Applied Amt:</b> ${num(fin.applied)?rupee(fin.applied):'—'}</td><td><b>Approved Amt:</b> ${num(fin.approved)?rupee(fin.approved):'—'}</td><td><b>Down Payment:</b> ${num(fin.downPayment)?rupee(fin.downPayment):'—'}</td></tr>
+   <tr><td><b>EMI:</b> ${num(fin.emi)?(rupee(fin.emi)+(num(fin.tenure)?(' × '+fin.tenure+' mo'):'')):'—'}</td><td><b>Finance se Aaya:</b> <b style="color:${G}">${rupee(finRec)}</b></td><td><b>Disbursal Baaki:</b> <b style="color:${finExpect-finRec>0?R:G}">${finExpect>0?rupee(finExpect-finRec):'—'}</b></td></tr>
+  </table>
+  ${finPays.length?`<table class="tb" style="margin-top:6px"><tr><th>Disbursal Date</th><th style="text-align:right">Amount (₹)</th><th>Ref / UTR</th><th>Note</th></tr>${finPays.map(p2=>`<tr><td>${dstr(p2.date)}</td><td style="text-align:right;color:${G};font-weight:700">${rupee(p2.amount)}</td><td>${esc(p2.ref)||''}</td><td>${esc(p2.note)||''}</td></tr>`).join('')}</table>`:''}`:'';
+ const hasBank=(S.bankName||S.accountNo||S.ifsc||S.upiId);
+ const bankPrint=hasBank?`
+  <div style="border:1.5px dashed ${HC};background:${ACC}55;padding:10px 14px;margin-top:14px;font-size:12px;border-radius:6px">
+   <b style="color:${HC}">🏦 PAYMENT KARNE KE LIYE HAMARI BANK DETAILS:</b><br>
+   ${S.bankName?('Bank: <b>'+esc(S.bankName)+'</b> &nbsp; | &nbsp; '):''}${S.accountNo?('A/c No: <b style="color:'+HC+'">'+esc(S.accountNo)+'</b> &nbsp; | &nbsp; '):''}${S.ifsc?('IFSC: <b>'+esc(S.ifsc)+'</b> &nbsp; '):''}${S.branch?('| &nbsp; Branch: '+esc(S.branch)):''}${S.upiId?('<br>UPI ID: <b style="color:'+HC+';font-size:14px">'+esc(S.upiId)+'</b>'):''}
+  </div>`:'';
+ $('#printArea').innerHTML=`
+ <style>
+  #printArea #psheet{-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:'Segoe UI',Arial,sans-serif;color:#000}
+  #printArea .tb{width:100%;border-collapse:collapse;font-size:12px}
+  #printArea .tb th{background:${ACC};color:#111;padding:6px 8px;text-align:left;border:1px solid #94a3b8}
+  #printArea .tb td{padding:6px 8px;border:1px solid #cbd5e1}
+  #printArea .sech{color:${HC};margin:16px 0 6px;font-size:15px}
+ </style>
+ <div id="psheet" style="max-width:820px;margin:auto">
+  <div style="background:${HC};color:#fff;padding:15px 18px;border-radius:8px 8px 0 0">
+   <div style="font-size:23px;font-weight:800">${esc(S.firmName||'Showroom')}</div>
+   ${(S.firmAddress||S.firmPhone)?`<div style="font-size:12px;opacity:.95;margin-top:3px">${esc(S.firmAddress||'')}${S.firmAddress&&S.firmPhone?' &nbsp;•&nbsp; ':''}${S.firmPhone?('📞 '+esc(S.firmPhone)):''}</div>`:''}
+  </div>
+  <div style="border:2px solid ${HC};border-top:none;padding:14px 16px;border-radius:0 0 8px 8px">
+   <table style="width:100%;font-size:13px"><tr>
+    <td><b style="font-size:15px">ACCOUNT STATEMENT</b> &nbsp; <span style="font-size:11px;color:#555">Date: ${dstr(todayISO())}</span></td>
+    <td style="text-align:right"><span style="background:${STC[st[1]]||'#64748b'};color:#fff;padding:3px 12px;border-radius:999px;font-size:11px;font-weight:800">${st[1]}</span></td>
+   </tr></table>
+   <table class="tb" style="margin-top:8px">
+    <tr><th colspan="2">👤 Customer &amp; Vehicle Details</th></tr>
+    <tr><td style="width:50%"><b>Customer:</b> ${esc(c.name)}<br><b>Mobile:</b> ${esc(c.mobile)||'—'}<br><b>Address:</b> ${esc(c.address)||'—'}</td>
+        <td><b>Invoice No:</b> ${esc(c.invoiceNo)||'—'}<br><b>Challan No:</b> ${esc(c.challanNo)||'—'}<br><b>Frame No:</b> ${esc(c.frameNo)||'—'}<br><b>Policy No:</b> ${esc(c.policyNo)||'—'}</td></tr>
+    <tr><td><b>Vehicle:</b> ${esc(c.model)||'—'} &nbsp;|&nbsp; <b>Sale Date:</b> ${dstr(c.saleDate)}</td>
+        <td><b>Financier:</b> ${esc(c.financier)||'—'} &nbsp;|&nbsp; <b>Ledger:</b> ${esc(c.ledgerName)||'—'}</td></tr>
+   </table>
+   ${finPrint}
+   <h3 class="sech">🧾 Billing Details</h3>
+   <table class="tb">
+    <tr><th>Particulars</th><th style="text-align:right">Amount (₹)</th></tr>
+    <tr><td>Ex Showroom</td><td style="text-align:right">${rupee(num(c.billing.exShowroom))}</td></tr>
+    ${BILL_FIELDS.slice(1,4).map(kf=>num(c.billing[kf[0]])?`<tr><td>${kf[1].replace('(–)','(less)')}</td><td style="text-align:right">– ${rupee(num(c.billing[kf[0]]))}</td></tr>`:'').join('')}
+    <tr style="background:${ACC}"><td><b>Effective Ex-Showroom</b></td><td style="text-align:right"><b>${rupee(t.eff)}</b></td></tr>
+    ${BILL_FIELDS.slice(4).map(kf=>{const val=num(c.billing[kf[0]]);if(!val)return'';const minus=kf[1].includes('(–)');return `<tr><td>${kf[1].replace(/\s*\(.\)\s*/,'')}</td><td style="text-align:right">${minus?'– ':''}${rupee(val)}</td></tr>`}).join('')}
+    <tr style="background:${HC};color:#fff"><td><b>TOTAL AMOUNT (Kitna Bana)</b></td><td style="text-align:right"><b>${rupee(t.total)}</b></td></tr>
+   </table>
+   <h3 class="sech">💳 Payment History (${pays.length} entries)</h3>
+   <table class="tb">
+    <tr><th>Date</th><th>Mode</th><th>Ref No</th><th>Note</th><th style="text-align:right">Amount (₹)</th></tr>
+    ${pays.map(p=>`<tr><td>${dstr(p.date)}</td><td>${modeBadge(p.mode)}</td><td>${esc(p.ref)||''}</td><td>${esc(p.note)||''}</td><td style="text-align:right;color:${G};font-weight:700">${rupee(p.amount)}</td></tr>`).join('')||`<tr><td colspan="5">No payments</td></tr>`}
+    <tr style="background:${ACC}"><td colspan="4"><b>TOTAL RECEIVED (Kitna Aaya)</b></td><td style="text-align:right;color:${G}"><b>${rupee(t.rec)}</b></td></tr>
+    <tr style="background:${ACC}"><td colspan="4"><b>NET BALANCE (Bakaya)</b></td><td style="text-align:right;color:${t.bal>0?R:G}"><b>${rupee(t.bal)}</b>${t.bal<0?' <span style="color:#4f46e5;font-size:10px">(Extra Advance hai)</span>':''}</b></b></td></tr>
+   </table>
+   ${bankPrint}
+   ${S.footerNote?`<p style="text-align:center;font-size:11px;color:#555;margin:14px 0 0">${esc(S.footerNote)}</p>`:''}
+   <br>
+   <table style="width:100%;font-size:12px;margin-top:12px"><tr><td>Customer Signature ______________</td><td style="text-align:right">For <b>${esc(S.firmName||'')}</b> &nbsp;______________</td></tr></table>
+  </div>
+ </div>`;
+ window.print();
+}
+
+/* ================= BACKUP / EXPORT ================= */
+function renderBackup(v){
+ const idbLine=_idbOK
+  ?'<span style="color:#15803d;font-weight:800">✔ IndexedDB (main database) — active</span> &nbsp;+&nbsp; <span style="color:#15803d">✔ localStorage (safety mirror) — active</span>'
+  :'<span style="color:#b45309;font-weight:800">⚠ IndexedDB is browser me available nahi</span> — data abhi sirf <span style="color:#15803d;font-weight:800">localStorage</span> me chal raha hai. App normal kaam karega, bas periodic JSON backup zaroor lete rahein.';
+ v.innerHTML=`
+ <div class="card" style="border-left:4px solid ${_idbOK?'#16a34a':'#d97706'}">
+  <div class="section-t" style="margin:0;border:0">🗄️ Storage Status</div>
+  <div style="font-size:13px;margin-top:4px">${idbLine}</div>
+  <div class="muted" style="margin-top:4px">Data do jagah save hota hai: pehla ek alag, bada IndexedDB database (fast, non-blocking), aur dusra localStorage ka ek turant-read safety copy — dono automatically sync rehte hain har save par.</div>
+ </div>
+ <div class="grid g3">
+  <div class="card">
+   <div class="section-t">📊 Excel Exports (CSV)</div>
+   <p class="muted">Ye files Excel me directly khulti hain.</p>
+   <button class="btn primary" style="width:100%;margin:6px 0" onclick="registerCSV()">⬇️ Full Sales Register (Excel format)</button>
+   <p class="muted">Bilkul aapke Excel ke columns me: Challan No, Invoice No, Frame No, saari billing, saare payment modes, Total Received, Net Balance, Ledger Name.</p>
+   <button class="btn primary" style="width:100%;margin:6px 0" onclick="paymentsCSV()">⬇️ Date-wise Payment Ledger</button>
+   <p class="muted">Saari customers ki har payment — date, mode, ref no ke saath (Bank/UPI cross-check ke liye).</p>
+  </div>
+  <div class="card">
+   <div class="section-t">💾 Full Data Backup (JSON)</div>
+   <p class="muted">Pura data ek file me — dusre computer/laptop par le jaane ya safety copy ke liye. <b>Har hafte lein!</b></p>
+   <button class="btn green" style="width:100%;margin:6px 0" onclick="backupJSON()">⬇️ Download Backup</button>
+   <hr>
+   <label>Backup se Restore karein:</label>
+   <input type="file" accept=".json" onchange="restoreJSON(event)">
+   <p class="muted">⚠️ Restore karne se current data backup se replace ho jayega.</p>
+  </div>
+  <div class="card">
+   <div class="section-t">🧪 Demo / ⚠️ Danger Zone</div>
+   <button class="btn ghost" style="width:100%;margin:6px 0" onclick="loadDemo()">Load Demo Data (samajhne ke liye)</button>
+   <button class="btn danger" style="width:100%;margin:6px 0" onclick="clearAll()">🗑 Saara Data Delete Karein</button>
+  </div>
+ </div>`;
+}
+function dl(name,text,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+text],{type:mime||'text/csv;charset=utf-8'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
+function csvCell(x){return '"'+String(x==null?'':x).replace(/"/g,'""')+'"'}
+function csv(rows){return rows.map(r=>r.map(csvCell).join(',')).join('\r\n')}
+function registerCSV(){
+ if(!state.customers.length){toast('Data khali hai');return}
+ const head=['Customer Name','Mobile','Model','Sale Date','Challan No','Invoice No','Frame No','Policy No','Financier',
+  'Ex Showroom','PM EDrive Scheme','Price Reduction','Scheme Discount','Effective Ex Showroom','RTO','Insurance','Accessories','Accessories Kit 2','EBW','ECW','Pro Pack','Teflon Coating','RSA','HPN','Logistics','Other','Discount','Total Amount',
+  'Cash','Card','Bank Cheque/DD','Advance','NEFT/RTGS','Scan Pay','Finance','Credit Note','Short Payment','Total Received','Net Balance','Loan/Case No','Finance Applied','Finance Approved','Down Payment','EMI','Tenure (Months)','Finance Status','Disbursal Received','Disbursal Pending','Suggested_Ledger_Name'];
+ const rows=[head];
+ state.customers.forEach(c=>{const t=totals(c);const g=k=>num(c.billing[k])||'';
+  const get=m=>t.mt[m]||'';
+  rows.push([c.name,c.mobile,c.model,dstr(c.saleDate),c.challanNo,c.invoiceNo,c.frameNo,c.policyNo,c.financier,
+   g('exShowroom'),g('pmEDrive'),g('priceReduction'),g('schemeDiscount'),t.eff,g('rto'),g('insurance'),g('accessories'),g('accessoriesKit2'),g('ebw'),g('ecw'),g('proPack'),g('teflon'),g('rsa'),g('hpn'),g('logistics'),g('other'),g('discount'),t.total,
+   get('Cash'),get('Card'),get('Bank Cheque/DD'),get('Advance'),get('NEFT/RTGS'),get('Scan Pay/UPI'),get('Finance'),get('Credit Note'),get('Short Payment'),t.rec,t.bal,
+   (c.finance||{}).loanNo||'',num((c.finance||{}).applied)||'',num((c.finance||{}).approved)||'',num((c.finance||{}).downPayment)||'',num((c.finance||{}).emi)||'',num((c.finance||{}).tenure)||'',(c.finance||{}).status||'',t.mt['Finance']||'',
+   (num((c.finance||{}).approved)||num((c.finance||{}).applied))?((num((c.finance||{}).approved)||num((c.finance||{}).applied))-(t.mt['Finance']||0)):'',c.ledgerName]);
+ });
+ dl('sales-register-'+todayISO()+'.csv',csv(rows));toast('Register download ho gaya ✔');
+}
+function paymentsCSV(){
+ const head=['Date','Customer Name','Mobile','Frame No','Invoice No','Payment Mode','Reference No','Amount','Note'];
+ const rows=[head];let any=false;
+ state.customers.forEach(c=>(c.payments||[]).forEach(p=>{any=true;rows.push([dstr(p.date),c.name,c.mobile,c.frameNo,c.invoiceNo,p.mode,p.ref,num(p.amount),p.note])}));
+ if(!any){toast('Koi payment nahi hai');return}
+ dl('payment-ledger-'+todayISO()+'.csv',csv(rows));toast('Payment ledger download ho gaya ✔');
+}
+function backupJSON(){dl('account-book-backup-'+todayISO()+'.json',JSON.stringify(state,null,1),'application/json');toast('Backup download ho gaya ✔')}
+function restoreJSON(ev){
+ const file=ev.target.files[0];if(!file)return;
+ const rd=new FileReader();
+ rd.onload=()=>{try{const st=JSON.parse(rd.result);
+   if(!st||!Array.isArray(st.customers))throw 0;
+   if(!confirm('Restore karne se CURRENT data backup se replace ho jayega. Continue?'))return;
+   state=st;saveNow().finally(()=>{go('dashboard');toast('Data restore ho gaya ✔')});}
+  catch(e){alert('⚠️ Ye file valid backup nahi hai!')}};
+ rd.readAsText(file);
+}
+function loadDemo(){
+ if(!confirm('2 demo customers add honge (samajhne ke liye). Baad me delete kar sakte hain. OK?'))return;
+ const d1={id:uid(),createdAt:todayISO(),name:'DEMO — Ramesh Patel',mobile:'9876543210',address:'Vadodara',financier:'TVS Credit',ledgerName:'Ramesh Patel',note:'',invoiceNo:'INV/2026/0101',challanNo:'CH/0101',frameNo:'MD626ABCDEF123456',policyNo:'POL/88452',model:'TVS iQube',saleDate:todayISO(),
+  billing:{exShowroom:125000,pmEDrive:6500,priceReduction:0,schemeDiscount:2000,rto:7000,insurance:8500,accessories:2500,accessoriesKit2:0,ebw:0,ecw:0,proPack:999,teflon:1500,rsa:0,hpn:0,logistics:800,other:0,discount:0},
+  payments:[
+   {id:uid(),date:todayISO(),mode:'Cash',amount:25000,ref:'',note:'Booking advance'},
+   {id:uid(),date:todayISO(),mode:'Finance',amount:60000,ref:'UTR/FIN/4451',note:'TVS Credit 1st disbursal'},
+   {id:uid(),date:todayISO(),mode:'Finance',amount:30000,ref:'UTR/FIN/4498',note:'TVS Credit 2nd disbursal'},
+   {id:uid(),date:todayISO(),mode:'Scan Pay/UPI',amount:13799,ref:'UPI-9988776655',note:'Balance'}],
+  finance:{loanNo:'TVSFIN/4451',applied:90000,approved:90000,downPayment:25000,emi:3850,tenure:24,status:'Disbursed'}};
+ const d2={id:uid(),createdAt:todayISO(),name:'DEMO — Sunita Shah',mobile:'9123456780',address:'Manjalpur, Vadodara',financier:'',ledgerName:'Sunita Shah',note:'Delivery next week',invoiceNo:'INV/2026/0102',challanNo:'CH/0102',frameNo:'MD626XYZDEF654321',policyNo:'',model:'TVS Jupiter 125',saleDate:todayISO(),
+  billing:{exShowroom:92000,pmEDrive:0,priceReduction:0,schemeDiscount:0,rto:7800,insurance:7900,accessories:1800,accessoriesKit2:0,ebw:0,ecw:0,proPack:0,teflon:0,rsa:0,hpn:0,logistics:0,other:0,discount:1000},
+  payments:[{id:uid(),date:todayISO(),mode:'Cash',amount:50000,ref:'',note:'First installment'}],
+  finance:{loanNo:'',applied:60000,approved:0,downPayment:50000,emi:0,tenure:0,status:'Applied'}};
+ state.customers.unshift(d1,d2);save();go('customers');toast('Demo data add ho gaya ✔');
+}
+function clearAll(){
+ if(!confirm('⚠️ SARA DATA permanently delete ho jayega! Pakka?'))return;
+ if(!confirm('Last warning: pehle Backup le liya? Continue delete?'))return;
+ state={customers:[]};saveNow().finally(()=>{go('dashboard');toast('Saara data delete ho gaya')});
+}
+window.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='p_amt'){const btn=document.querySelector('.btn.green');if(btn)btn.click()}});
+window.addEventListener('beforeprint',()=>{saveNow()});
+_bootStorage().then(()=>{
+ applyBrand();
+ applyTheme();
+ render();
+}).catch(()=>{
+ /* Absolute last resort — should not happen, but never leave the screen blank */
+ state=_lsRead()||_emptyState();
+ migrate();
+ applyBrand();
+ applyTheme();
+ render();
+});
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a255dadbab9b46c0',t:'MTc4NTc2NTY5Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
