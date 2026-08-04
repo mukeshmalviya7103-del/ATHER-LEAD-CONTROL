@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Card Account & Payment Management System</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .fade-in { animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    @media print {
+      body * { visibility: visible; }
+      no-print, nav, header, button { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col" data-author="Mukesh">
+
+  <!-- Hidden Dev Signature -->
+  <div style="display:none;" id="authorized-dev-meta">System Authorized & Designed for Mukesh. All rights reserved.</div>
+
+  <!-- Top Header -->
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-600 p-2 rounded-lg text-white">
+          <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
+        </div>
+        <div>
+          <h1 id="brandHeaderTitle" class="font-bold text-lg leading-tight tracking-wide flex items-center gap-2">
+            JobCard Ledger Pro 
+            <span class="text-xs bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded-full font-medium">
+              <i class="fa-solid fa-shield-halved mr-1"></i>Auth: Mukesh
+            </span>
+          </h1>
+          <p id="brandHeaderSub" class="text-xs text-slate-400">Manual & DMS Software Job Card & Payment Account Manager</p>
+        </div>
+      </div>
+
+      <!-- Global Search Bar -->
+      <div class="flex-1 max-w-md mx-6 hidden lg:block">
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <i class="fa-solid fa-search"></i>
+          </span>
+          <input type="text" id="globalSearchInput" placeholder="Global Search: Job Card No, Customer, Vehicle, Mobile, Advisor, Repair Type..." 
+            class="w-full pl-10 pr-4 py-2 bg-slate-800 text-sm rounded-lg border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button onclick="openNewJobCardModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center space-x-2 transition">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span class="hidden sm:inline">New Job Card</span>
+        </button>
+        <button onclick="loadAllData()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-lg text-sm border border-slate-700 transition" title="Refresh Data">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs Bar -->
+  <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-16 z-20 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-2 overflow-x-auto">
+      <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-btn px-4 py-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-table-list"></i> Job Cards & Payments
+      </button>
+      <button onclick="switchTab('monthly')" id="tab-btn-monthly" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-indigo-600 flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-calendar-days"></i> Monthly Report
+      </button>
+      <button onclick="switchTab('payments')" id="tab-btn-payments" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-indigo-600 flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-money-check-dollar"></i> Payment Reports (Date-Wise)
+      </button>
+      <button onclick="switchTab('advisors')" id="tab-btn-advisors" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-indigo-600 flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-user-tie"></i> Advisor Performance
+      </button>
+      <button onclick="switchTab('settings')" id="tab-btn-settings" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-indigo-600 flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-gear"></i> Settings
+      </button>
+      <button onclick="switchTab('tools')" id="tab-btn-tools" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-indigo-600 flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-toolbox"></i> Tools & Maintenance
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Search Bar -->
+  <div class="bg-slate-900 px-4 py-2 lg:hidden border-t border-slate-800 no-print">
+    <div class="relative">
+      <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+        <i class="fa-solid fa-search"></i>
+      </span>
+      <input type="text" id="globalSearchInputMobile" placeholder="Global Search Job Cards..." 
+        class="w-full pl-10 pr-4 py-2 bg-slate-800 text-sm rounded-lg border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- ==================== TAB 1: DASHBOARD / JOB CARDS ==================== -->
+    <div id="tab-content-dashboard" class="tab-content space-y-6">
+      <!-- Stats Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Job Cards</p>
+            <h3 id="statTotalCards" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
+            <p class="text-xs text-slate-500 mt-1"><span id="statManualCount">0</span> Manual | <span id="statDmsCount">0</span> DMS</p>
+          </div>
+          <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl">
+            <i class="fa-solid fa-clipboard-list"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Billed Amount</p>
+            <h3 id="statTotalBilled" class="text-2xl font-bold text-slate-900 mt-1">₹0</h3>
+            <p class="text-xs text-slate-400 mt-1">Net Invoice Value</p>
+          </div>
+          <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Received</p>
+            <h3 id="statTotalCollected" class="text-2xl font-bold text-emerald-600 mt-1">₹0</h3>
+            <p class="text-xs text-slate-400 mt-1">Date-wise payments</p>
+          </div>
+          <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Balance</p>
+            <h3 id="statTotalPending" class="text-2xl font-bold text-rose-600 mt-1">₹0</h3>
+            <p class="text-xs text-slate-400 mt-1">Outstanding dues</p>
+          </div>
+          <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between sm:col-span-2 lg:col-span-1">
+          <div>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Authorization</p>
+            <h3 class="text-lg font-bold text-slate-900 mt-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-user-shield text-indigo-600"></i> Mukesh
+            </h3>
+            <p class="text-xs text-emerald-600 font-medium mt-1">● System Active</p>
+          </div>
+          <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl">
+            <i class="fa-solid fa-fingerprint"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Controls Bar -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-center justify-between">
+        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Job Card No. Type</label>
+            <select id="filterCardType" onchange="applyFilters()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <option value="All">All Job Cards</option>
+              <option value="Manual">Has Manual No.</option>
+              <option value="DMS Software">Has DMS No.</option>
+              <option value="Both">Both Manual + DMS No.</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Repair Type</label>
+            <select id="filterRepairType" onchange="applyFilters()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <option value="All">All Repair Types</option>
+              <option value="Periodic Service">Periodic Service</option>
+              <option value="Mechanical Repair">Mechanical Repair</option>
+              <option value="Denting & Painting">Denting & Painting</option>
+              <option value="Electrical & AC">Electrical & AC</option>
+              <option value="Accidental Repair">Accidental Repair</option>
+              <option value="General Checkup">General Checkup</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Payment Status</label>
+            <select id="filterStatus" onchange="applyFilters()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <option value="All">All Status</option>
+              <option value="Paid">Paid</option>
+              <option value="Partial">Partial</option>
+              <option value="Unpaid">Unpaid</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">From Date</label>
+            <input type="date" id="filterFromDate" onchange="applyFilters()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">To Date</label>
+            <input type="date" id="filterToDate" onchange="applyFilters()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <div class="self-end">
+            <button onclick="resetFilters()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium transition">
+              <i class="fa-solid fa-rotate-right mr-1"></i> Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="exportDataJSON()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+            <i class="fa-solid fa-download"></i> Backup JSON
+          </button>
+          <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+            <i class="fa-solid fa-print"></i> Print
+          </button>
+        </div>
+      </div>
+
+      <!-- Job Cards Table Section -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+          <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+            <i class="fa-solid fa-table-list text-indigo-600"></i> Job Card Accounts & Payment Records
+          </h2>
+          <span id="recordCountBadge" class="text-xs bg-indigo-100 text-indigo-800 font-semibold px-2.5 py-1 rounded-full">0 Records</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-100/70 text-slate-600 uppercase text-xs tracking-wider border-b border-slate-200">
+                <th class="py-3 px-4 font-semibold">Job Card No / Type</th>
+                <th class="py-3 px-4 font-semibold">Repair Type</th>
+                <th class="py-3 px-4 font-semibold">Date</th>
+                <th class="py-3 px-4 font-semibold">Customer & Vehicle</th>
+                <th class="py-3 px-4 font-semibold">Advisor</th>
+                <th class="py-3 px-4 font-semibold text-right">Net Amount</th>
+                <th class="py-3 px-4 font-semibold text-right">Paid</th>
+                <th class="py-3 px-4 font-semibold text-right">Balance</th>
+                <th class="py-3 px-4 font-semibold text-center">Status</th>
+                <th class="py-3 px-4 font-semibold text-center">Actions (One-Click)</th>
+              </tr>
+            </thead>
+            <tbody id="jobCardTableBody" class="divide-y divide-slate-200 text-slate-700">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden py-16 text-center">
+          <div class="text-slate-300 text-5xl mb-3"><i class="fa-solid fa-folder-open"></i></div>
+          <p class="text-slate-600 font-medium">No job cards found matching your filters or search.</p>
+          <p class="text-slate-400 text-xs mt-1">Try clearing search filters or create a new job card.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 2: MONTHLY REPORT ==================== -->
+    <div id="tab-content-monthly" class="tab-content space-y-6 hidden">
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+          <div>
+            <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+              <i class="fa-solid fa-calendar-days text-indigo-600"></i> Monthly Financial Reports & Summary
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">Month-wise breakdown of billing, collections, and job card counts</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportMonthlyCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel"></i> Export CSV
+            </button>
+            <button onclick="loadMonthlyReport()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium transition">
+              <i class="fa-solid fa-rotate mr-1"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-100 text-slate-600 uppercase text-xs tracking-wider border-b border-slate-200">
+                <th class="py-3 px-4 font-semibold">Month (YYYY-MM)</th>
+                <th class="py-3 px-4 font-semibold text-center">Total Job Cards</th>
+                <th class="py-3 px-4 font-semibold text-center">Manual / DMS</th>
+                <th class="py-3 px-4 font-semibold text-right">Total Billed (₹)</th>
+                <th class="py-3 px-4 font-semibold text-right">Total Collected (₹)</th>
+                <th class="py-3 px-4 font-semibold text-right">Pending Balance (₹)</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyReportTableBody" class="divide-y divide-slate-200 text-slate-700">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB: PAYMENT REPORTS (Date-Wise & Month-Wise) ==================== -->
+    <div id="tab-content-payments" class="tab-content space-y-6 hidden">
+
+      <!-- Mode-wise Totals -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <p class="text-[11px] font-semibold text-slate-500 uppercase">UPI</p>
+          <p id="payTotalUPI" class="text-lg font-bold text-slate-900 mt-1">₹0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <p class="text-[11px] font-semibold text-slate-500 uppercase">Cash</p>
+          <p id="payTotalCash" class="text-lg font-bold text-slate-900 mt-1">₹0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <p class="text-[11px] font-semibold text-slate-500 uppercase">Bank / NEFT</p>
+          <p id="payTotalBank" class="text-lg font-bold text-slate-900 mt-1">₹0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <p class="text-[11px] font-semibold text-slate-500 uppercase">Cheque</p>
+          <p id="payTotalCheque" class="text-lg font-bold text-slate-900 mt-1">₹0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <p class="text-[11px] font-semibold text-slate-500 uppercase">Credit Card</p>
+          <p id="payTotalCard" class="text-lg font-bold text-slate-900 mt-1">₹0</p>
+        </div>
+        <div class="bg-indigo-600 p-4 rounded-xl shadow-sm border border-indigo-600">
+          <p class="text-[11px] font-semibold text-indigo-200 uppercase">Grand Total Received</p>
+          <p id="payTotalGrand" class="text-lg font-bold text-white mt-1">₹0</p>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200">
+          <div>
+            <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+              <i class="fa-solid fa-money-check-dollar text-indigo-600"></i> Date-Wise & Month-Wise Payment Report
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">Har payment kis date par aur kis mode se aayi hai — advanced monthly & date-wise filtering aur export</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="payFilterMonth" onchange="loadPaymentReport()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <option value="All">All Months</option>
+            </select>
+            <select id="payFilterMode" onchange="loadPaymentReport()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <option value="All">All Modes</option>
+              <option value="UPI">UPI</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer / NEFT</option>
+              <option value="Cheque">Cheque</option>
+              <option value="Credit Card">Credit Card</option>
+            </select>
+            <button onclick="exportPaymentsCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel"></i> Export CSV
+            </button>
+            <button onclick="loadPaymentReport()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium transition">
+              <i class="fa-solid fa-rotate"></i>
+            </button>
+            <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition">
+              <i class="fa-solid fa-print"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-100 text-slate-600 uppercase text-xs tracking-wider border-b border-slate-200">
+                <th class="py-3 px-4 font-semibold">Payment Date</th>
+                <th class="py-3 px-4 font-semibold">Job Card No.</th>
+                <th class="py-3 px-4 font-semibold">Customer / Vehicle</th>
+                <th class="py-3 px-4 font-semibold">Mode</th>
+                <th class="py-3 px-4 font-semibold">Reference</th>
+                <th class="py-3 px-4 font-semibold text-right">Amount (₹)</th>
+              </tr>
+            </thead>
+            <tbody id="paymentReportTableBody" class="divide-y divide-slate-200 text-slate-700">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: ADVISOR PERFORMANCE ==================== -->
+    <div id="tab-content-advisors" class="tab-content space-y-6 hidden">
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+          <div>
+            <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+              <i class="fa-solid fa-user-tie text-indigo-600"></i> Service Advisor Performance & Revenue Report
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">Track job cards handled, billed amounts, and collection efficiency per advisor</p>
+          </div>
+          <button onclick="loadAdvisorPerformance()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium transition">
+            <i class="fa-solid fa-rotate mr-1"></i> Refresh Performance
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-100 text-slate-600 uppercase text-xs tracking-wider border-b border-slate-200">
+                <th class="py-3 px-4 font-semibold">Service Advisor Name</th>
+                <th class="py-3 px-4 font-semibold text-center">Job Cards Handled</th>
+                <th class="py-3 px-4 font-semibold text-right">Total Billed (₹)</th>
+                <th class="py-3 px-4 font-semibold text-right">Total Collected (₹)</th>
+                <th class="py-3 px-4 font-semibold text-right">Pending Due (₹)</th>
+                <th class="py-3 px-4 font-semibold text-center">Status Breakdown (Paid/Part/Unpaid)</th>
+              </tr>
+            </thead>
+            <tbody id="advisorPerformanceTableBody" class="divide-y divide-slate-200 text-slate-700">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 4: SETTINGS ==================== -->
+    <div id="tab-content-settings" class="tab-content space-y-6 hidden">
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 max-w-3xl mx-auto">
+        <div class="mb-6 pb-4 border-b border-slate-200">
+          <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+            <i class="fa-solid fa-gear text-indigo-600"></i> Workshop Settings & Custom Options
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">Customize workshop name, address, default tax rate, and authorized personnel</p>
+        </div>
+
+        <form id="settingsForm" onsubmit="saveSettings(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Workshop / Business Name *</label>
+              <input type="text" id="setting_workshop_name" required 
+                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Authorized Person / Owner *</label>
+              <input type="text" id="setting_authorized_by" required value="Mukesh"
+                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Workshop Address</label>
+            <textarea id="setting_workshop_address" rows="2" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Contact Phone</label>
+              <input type="text" id="setting_workshop_phone" 
+                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Default Tax Rate (%)</label>
+              <input type="number" step="0.1" id="setting_tax_rate" 
+                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Currency Symbol</label>
+              <input type="text" id="setting_currency" value="₹" 
+                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-200 flex justify-end">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium shadow transition">
+              <i class="fa-solid fa-save mr-1"></i> Save Settings
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 5: TOOLS & MAINTENANCE ==================== -->
+    <div id="tab-content-tools" class="tab-content space-y-6 hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        
+        <!-- Backup & Restore Box -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center space-x-3 pb-3 border-b border-slate-200">
+            <div class="bg-blue-50 text-blue-600 p-2.5 rounded-xl text-lg">
+              <i class="fa-solid fa-database"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-800 text-base">Data Backup & Restore</h3>
+              <p class="text-xs text-slate-500">Export or restore all your job card and payment records</p>
+            </div>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <button onclick="exportDataJSON()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition">
+              <i class="fa-solid fa-download"></i> Download Full Backup (.json)
+            </button>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Restore Database from Backup</label>
+              <input type="file" id="importFile" accept=".json" onchange="importDataJSON(event)" 
+                class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+            </div>
+          </div>
+        </div>
+
+        <!-- System Maintenance Box -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center space-x-3 pb-3 border-b border-slate-200">
+            <div class="bg-rose-50 text-rose-600 p-2.5 rounded-xl text-lg">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-800 text-base">System Maintenance & Reset</h3>
+              <p class="text-xs text-slate-500">Danger zone for database reset and clearing logs</p>
+            </div>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <p class="text-xs text-slate-600">Clearing all job cards and payment records will permanently wipe the database table. Make sure to download a backup before resetting.</p>
+            
+            <button onclick="resetAllData()" class="w-full bg-rose-600 hover:bg-rose-500 text-white py-2.5 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition">
+              <i class="fa-solid fa-trash-can"></i> Clear All Data & Reset Database
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-auto text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>© 2026 JobCard Ledger Pro — All Rights Reserved.</p>
+      <p class="flex items-center gap-1 font-medium text-slate-700">
+        <i class="fa-solid fa-shield-halved text-indigo-600"></i> Authorized & Managed by <span class="text-indigo-600 font-bold" id="footerAuthName">Mukesh</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- MODAL: Create / Edit Job Card -->
+  <div id="jobCardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden fade-in max-h-[90vh] flex flex-col">
+      <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+        <h3 id="modalTitle" class="font-bold text-lg flex items-center gap-2">
+          <i class="fa-solid fa-file-circle-plus text-indigo-400"></i> New Job Card Payment Entry
+        </h3>
+        <button onclick="closeJobCardModal()" class="text-slate-400 hover:text-white text-xl">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="jobCardForm" onsubmit="saveJobCard(event)" class="p-6 overflow-y-auto space-y-4 flex-1">
+        <input type="hidden" id="editJobCardId">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Manual Job Card No.</label>
+            <input type="text" id="manual_job_card_no" placeholder="e.g. JC-MAN-0231" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">DMS Job Card No.</label>
+            <input type="text" id="dms_job_card_no" placeholder="e.g. DMS-88342" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 -mt-2">Ek hi job card ke liye Manual No. aur DMS No. dono alag-alag daal sakte hain — kam se kam ek number bharna zaroori hai.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Repair Type *</label>
+            <select id="repair_type" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <option value="Periodic Service">Periodic Service (PMS)</option>
+              <option value="Mechanical Repair">Mechanical Repair</option>
+              <option value="Denting & Painting">Denting & Painting</option>
+              <option value="Electrical & AC">Electrical & AC</option>
+              <option value="Accidental Repair">Accidental Repair</option>
+              <option value="General Checkup">General Checkup</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Entry Date *</label>
+            <input type="date" id="entry_date" required 
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Customer Name *</label>
+            <input type="text" id="customer_name" required placeholder="Full Name" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Mobile Number *</label>
+            <input type="text" id="mobile" required placeholder="10-digit mobile" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Vehicle Number *</label>
+            <input type="text" id="vehicle_no" required placeholder="e.g. GJ-06-XX-0000" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm uppercase focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Vehicle Model</label>
+            <input type="text" id="vehicle_model" placeholder="e.g. Swift, Creta, Nexon" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Service Advisor</label>
+            <input type="text" id="advisor_name" placeholder="Advisor Name" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Total Amount (₹) *</label>
+            <input type="number" step="0.01" id="total_amount" required placeholder="0.00" oninput="calculateNet()"
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Discount (₹)</label>
+            <input type="number" step="0.01" id="discount" value="0" placeholder="0.00" oninput="calculateNet()"
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="bg-indigo-50 p-3 rounded-lg flex items-center justify-between text-indigo-900 font-semibold text-sm">
+          <span>Net Invoice Payable:</span>
+          <span id="previewNet" class="text-lg">₹0.00</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Remarks / Job Description</label>
+          <textarea id="remarks" rows="2" placeholder="Enter work details, parts replaced, notes..." 
+            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex justify-end space-x-3">
+          <button type="button" onclick="closeJobCardModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+            Cancel
+          </button>
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg text-sm font-medium shadow transition">
+            <i class="fa-solid fa-save mr-1"></i> Save Job Card
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: One-Click Fully Information & Payment Ledger -->
+  <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden fade-in max-h-[92vh] flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="bg-indigo-600 p-2 rounded-lg text-white">
+            <i class="fa-solid fa-receipt text-lg"></i>
+          </div>
+          <div>
+            <h3 id="detJobCardNo" class="font-bold text-lg text-white">JC-00000</h3>
+            <p id="detCardType" class="text-xs text-indigo-300">Manual: - | DMS: -</p>
+          </div>
+        </div>
+        <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white text-xl">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/50">
+        
+        <!-- Summary Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500 font-semibold uppercase">Customer Info</p>
+            <p id="detCustomerName" class="font-bold text-slate-800 text-base mt-1">-</p>
+            <p id="detMobile" class="text-xs text-slate-600 mt-0.5">-</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500 font-semibold uppercase">Vehicle Details</p>
+            <p id="detVehicleNo" class="font-bold text-slate-800 text-base mt-1">-</p>
+            <p id="detVehicleModel" class="text-xs text-slate-600 mt-0.5">-</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500 font-semibold uppercase">Financials</p>
+            <p class="text-xs text-slate-600 mt-1">Billed: <span id="detNetAmt" class="font-bold text-slate-800">₹0</span></p>
+            <p class="text-xs text-slate-600 mt-0.5">Paid: <span id="detPaidAmt" class="font-bold text-emerald-600">₹0</span></p>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500 font-semibold uppercase">Balance Due</p>
+            <p id="detBalanceAmt" class="text-xl font-bold text-rose-600 mt-1">₹0</p>
+            <span id="detStatusBadge" class="inline-block mt-1 text-xs px-2 py-0.5 rounded font-medium">Unpaid</span>
+          </div>
+        </div>
+
+        <!-- Additional Info & Remarks -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+          <div>
+            <span class="text-xs font-semibold text-slate-500 uppercase block">Repair Type:</span>
+            <span id="detRepairType" class="font-medium text-indigo-600">-</span>
+          </div>
+          <div>
+            <span class="text-xs font-semibold text-slate-500 uppercase block">Entry Date:</span>
+            <span id="detEntryDate" class="font-medium text-slate-800">-</span>
+          </div>
+          <div>
+            <span class="text-xs font-semibold text-slate-500 uppercase block">Service Advisor:</span>
+            <span id="detAdvisor" class="font-medium text-slate-800">-</span>
+          </div>
+          <div class="sm:col-span-3">
+            <span class="text-xs font-semibold text-slate-500 uppercase block">Remarks / Job Notes:</span>
+            <span id="detRemarks" class="text-slate-700 italic">-</span>
+          </div>
+        </div>
+
+        <!-- Payment Entry Section -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
+            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-money-bill-wave text-emerald-600"></i> Date-Wise Payment History & Entry
+            </h4>
+            <button onclick="togglePaymentForm()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-plus"></i> Add Payment
+            </button>
+          </div>
+
+          <!-- Add Payment Form (Collapsible) -->
+          <div id="paymentFormContainer" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 fade-in">
+            <form id="paymentEntryForm" onsubmit="submitPayment(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+              <input type="hidden" id="payJobCardId">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Payment Date *</label>
+                <input type="date" id="pay_date" required class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Amount (₹) *</label>
+                <input type="number" step="0.01" id="pay_amount" required placeholder="0.00" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Mode *</label>
+                <select id="pay_mode" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500">
+                  <option value="UPI">UPI (GPay/PhonePe/Paytm)</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Bank Transfer">Bank Transfer / NEFT</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Credit Card">Credit Card</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Ref / UTR No.</label>
+                <input type="text" id="pay_ref" placeholder="Txn ID / Cheque No" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg text-xs font-medium shadow transition">
+                  Save Payment
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Payments Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-100 text-slate-600 uppercase border-b border-slate-200">
+                  <th class="py-2.5 px-3">Date</th>
+                  <th class="py-2.5 px-3">Mode</th>
+                  <th class="py-2.5 px-3">Reference / UTR</th>
+                  <th class="py-2.5 px-3">Notes</th>
+                  <th class="py-2.5 px-3 text-right">Amount</th>
+                  <th class="py-2.5 px-3 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="paymentHistoryTableBody" class="divide-y divide-slate-200">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-white border-t border-slate-200 px-6 py-3 flex justify-between items-center">
+        <div class="text-xs text-slate-500">
+          Authorized by <span class="font-bold text-slate-700" id="modalAuthName">Mukesh</span>
+        </div>
+        <div class="flex space-x-3">
+          <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+            <i class="fa-solid fa-print"></i> Print Receipt
+          </button>
+          <button onclick="closeDetailModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-xs font-medium transition">
+            Close
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JavaScript Logic (Fully Self-Contained with localStorage & Sample Data) -->
+  <script>
+    const DB_KEY = 'jcledger_db_v2';
+    let allJobCards = [];
+    let currentSelectedJobCardId = null;
+    let appSettings = {};
+
+    function getDB() {
+      let raw = localStorage.getItem(DB_KEY);
+      if (!raw) {
+        const fresh = {
+          jobcards: [
+            {
+              id: 1,
+              manual_job_card_no: 'JC-MAN-2026-001',
+              dms_job_card_no: 'DMS-10492',
+              repair_type: 'Periodic Service',
+              entry_date: '2026-08-01',
+              customer_name: 'Rajesh Sharma',
+              mobile: '9876543210',
+              vehicle_no: 'GJ-06-AB-1234',
+              vehicle_model: 'Maruti Swift',
+              advisor_name: 'Amit Patel',
+              total_amount: 5500,
+              discount: 200,
+              net_amount: 5300,
+              remarks: 'Regular service & brake pad replacement',
+              created_at: new Date().toISOString(),
+              payments: [
+                { id: 1, payment_date: '2026-08-01', amount: 5300, payment_mode: 'UPI', reference_no: 'UPI/2026/0801/9871', notes: 'GPay payment' }
+              ]
+            },
+            {
+              id: 2,
+              manual_job_card_no: 'JC-MAN-2026-002',
+              dms_job_card_no: 'DMS-10495',
+              repair_type: 'Denting & Painting',
+              entry_date: '2026-08-02',
+              customer_name: 'Priya Mehta',
+              mobile: '9723456789',
+              vehicle_no: 'GJ-01-XY-9876',
+              vehicle_model: 'Hyundai Creta',
+              advisor_name: 'Suresh Kumar',
+              total_amount: 12400,
+              discount: 400,
+              net_amount: 12000,
+              remarks: 'Front bumper denting & painting',
+              created_at: new Date().toISOString(),
+              payments: [
+                { id: 2, payment_date: '2026-08-02', amount: 5000, payment_mode: 'Cash', reference_no: 'CASH-01', notes: 'Advance cash' }
+              ]
+            }
+          ],
+          settings: { workshop_name: 'Mukesh Auto Workshop & Service Center', authorized_by: 'Mukesh', workshop_address: 'Main Highway Road, Vadodara, Gujarat', workshop_phone: '+91 9876543210', tax_rate: '18', currency: '₹' },
+          next_id: 3,
+          next_payment_id: 3
+        };
+        localStorage.setItem(DB_KEY, JSON.stringify(fresh));
+        return fresh;
+      }
+      const db = JSON.parse(raw);
+      if (!db.settings) db.settings = { workshop_name: 'Mukesh Auto Workshop & Service Center', authorized_by: 'Mukesh', workshop_address: '', workshop_phone: '', tax_rate: '18', currency: '₹' };
+      if (!db.next_id) db.next_id = Math.max(1, ...db.jobcards.map(j => (j.id || 0) + 1));
+      if (!db.next_payment_id) {
+        const allPayIds = db.jobcards.flatMap(j => (j.payments || []).map(p => p.id || 0));
+        db.next_payment_id = Math.max(1, ...allPayIds.map(x => x + 1));
+      }
+      return db;
+    }
+
+    function saveDB(db) {
+      localStorage.setItem(DB_KEY, JSON.stringify(db));
+    }
+
+    function computeJobCard(raw) {
+      const paid_amount = (raw.payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0);
+      const balance_due = raw.net_amount - paid_amount;
+      let status = 'Unpaid';
+      if (balance_due <= 0) status = 'Paid';
+      else if (paid_amount > 0) status = 'Partial';
+      return Object.assign({}, raw, {
+        repair_type: raw.repair_type || 'Periodic Service',
+        paid_amount: paid_amount,
+        total_paid: paid_amount,
+        balance_due: balance_due,
+        status: status
+      });
+    }
+
+    function getComputedJobCards() {
+      const db = getDB();
+      return db.jobcards.map(computeJobCard).sort((a, b) => (b.entry_date || '').localeCompare(a.entry_date || '') || b.id - a.id);
+    }
+
+    function computeStats(cards) {
+      const total_billed = cards.reduce((s, c) => s + c.net_amount, 0);
+      const total_collected = cards.reduce((s, c) => s + c.paid_amount, 0);
+      return {
+        total_job_cards: cards.length,
+        total_billed: total_billed,
+        total_collected: total_collected,
+        total_pending: total_billed - total_collected,
+        manual_count: cards.filter(c => c.manual_job_card_no && c.manual_job_card_no.trim()).length,
+        dms_count: cards.filter(c => c.dms_job_card_no && c.dms_job_card_no.trim()).length
+      };
+    }
+
+    function getAllPaymentsFlat() {
+      const cards = getComputedJobCards();
+      const rows = [];
+      cards.forEach(c => {
+        (c.payments || []).forEach(p => {
+          rows.push({
+            payment_date: p.payment_date,
+            amount: Number(p.amount || 0),
+            payment_mode: p.payment_mode,
+            reference_no: p.reference_no,
+            job_card_label: [c.manual_job_card_no, c.dms_job_card_no].filter(Boolean).join(' / ') || '-',
+            customer_name: c.customer_name,
+            vehicle_no: c.vehicle_no
+          });
+        });
+      });
+      rows.sort((a, b) => (b.payment_date || '').localeCompare(a.payment_date || ''));
+      return rows;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('entry_date').valueAsDate = new Date();
+      document.getElementById('pay_date').valueAsDate = new Date();
+
+      loadSettings();
+      loadAllData();
+
+      document.getElementById('globalSearchInput').addEventListener('input', (e) => {
+        filterAndRenderTable(e.target.value);
+      });
+      document.getElementById('globalSearchInputMobile').addEventListener('input', (e) => {
+        document.getElementById('globalSearchInput').value = e.target.value;
+        filterAndRenderTable(e.target.value);
+      });
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('border-indigo-600', 'text-indigo-600', 'font-semibold');
+        el.classList.add('border-transparent', 'text-slate-600', 'font-medium');
+      });
+
+      document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      activeBtn.classList.remove('border-transparent', 'text-slate-600', 'font-medium');
+      activeBtn.classList.add('border-indigo-600', 'text-indigo-600', 'font-semibold');
+
+      if (tabId === 'monthly') loadMonthlyReport();
+      if (tabId === 'payments') loadPaymentReport();
+      if (tabId === 'advisors') loadAdvisorPerformance();
+      if (tabId === 'settings') loadSettingsForm();
+    }
+
+    function loadSettings() {
+      const db = getDB();
+      appSettings = db.settings;
+      if (appSettings.workshop_name) {
+        document.getElementById('brandHeaderTitle').innerHTML = `${appSettings.workshop_name} <span class="text-xs bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded-full font-medium"><i class="fa-solid fa-shield-halved mr-1"></i>Auth: ${appSettings.authorized_by || 'Mukesh'}</span>`;
+      }
+      if (appSettings.authorized_by) {
+        document.getElementById('footerAuthName').innerText = appSettings.authorized_by;
+        document.getElementById('modalAuthName').innerText = appSettings.authorized_by;
+      }
+    }
+
+    function loadSettingsForm() {
+      const s = getDB().settings;
+      document.getElementById('setting_workshop_name').value = s.workshop_name || '';
+      document.getElementById('setting_authorized_by').value = s.authorized_by || 'Mukesh';
+      document.getElementById('setting_workshop_address').value = s.workshop_address || '';
+      document.getElementById('setting_workshop_phone').value = s.workshop_phone || '';
+      document.getElementById('setting_tax_rate').value = s.tax_rate || '18';
+      document.getElementById('setting_currency').value = s.currency || '₹';
+    }
+
+    function saveSettings(e) {
+      e.preventDefault();
+      const db = getDB();
+      db.settings = {
+        workshop_name: document.getElementById('setting_workshop_name').value,
+        authorized_by: document.getElementById('setting_authorized_by').value,
+        workshop_address: document.getElementById('setting_workshop_address').value,
+        workshop_phone: document.getElementById('setting_workshop_phone').value,
+        tax_rate: document.getElementById('setting_tax_rate').value,
+        currency: document.getElementById('setting_currency').value
+      };
+      saveDB(db);
+      alert('Settings saved successfully!');
+      loadSettings();
+    }
+
+    function loadAllData() {
+      const cards = getComputedJobCards();
+      allJobCards = cards;
+      const stats = computeStats(cards);
+
+      document.getElementById('statTotalCards').innerText = stats.total_job_cards;
+      document.getElementById('statTotalBilled').innerText = '₹' + stats.total_billed.toLocaleString('en-IN');
+      document.getElementById('statTotalCollected').innerText = '₹' + stats.total_collected.toLocaleString('en-IN');
+      document.getElementById('statTotalPending').innerText = '₹' + stats.total_pending.toLocaleString('en-IN');
+      document.getElementById('statManualCount').innerText = stats.manual_count;
+      document.getElementById('statDmsCount').innerText = stats.dms_count;
+
+      applyFilters();
+    }
+
+    function loadMonthlyReport() {
+      const cards = getComputedJobCards();
+      const groups = {};
+      cards.forEach(c => {
+        const month = (c.entry_date || '').slice(0, 7) || 'Unknown';
+        if (!groups[month]) groups[month] = { month, total_job_cards: 0, manual_count: 0, dms_count: 0, total_billed: 0, total_collected: 0 };
+        groups[month].total_job_cards++;
+        if (c.manual_job_card_no && c.manual_job_card_no.trim()) groups[month].manual_count++;
+        if (c.dms_job_card_no && c.dms_job_card_no.trim()) groups[month].dms_count++;
+        groups[month].total_billed += c.net_amount;
+        groups[month].total_collected += c.paid_amount;
+      });
+      const data = Object.values(groups).sort((a, b) => b.month.localeCompare(a.month));
+
+      const tbody = document.getElementById('monthlyReportTableBody');
+      tbody.innerHTML = '';
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">No monthly records found.</td></tr>`;
+        return;
+      }
+
+      data.forEach(m => {
+        const pending = m.total_billed - m.total_collected;
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-slate-900"><i class="fa-regular fa-calendar text-indigo-600 mr-2"></i>${m.month}</td>
+          <td class="py-3 px-4 text-center font-semibold text-slate-800">${m.total_job_cards}</td>
+          <td class="py-3 px-4 text-center text-xs text-slate-600"><span class="bg-purple-50 text-purple-700 px-2 py-0.5 rounded">${m.manual_count} Manual</span> / <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">${m.dms_count} DMS</span></td>
+          <td class="py-3 px-4 text-right font-bold text-slate-900">₹${m.total_billed.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-right font-bold text-emerald-600">₹${m.total_collected.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-right font-bold text-rose-600">₹${pending > 0 ? pending.toLocaleString('en-IN') : '0'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportMonthlyCSV() {
+      const cards = getComputedJobCards();
+      const groups = {};
+      cards.forEach(c => {
+        const month = (c.entry_date || '').slice(0, 7) || 'Unknown';
+        if (!groups[month]) groups[month] = { month, total_job_cards: 0, total_billed: 0, total_collected: 0 };
+        groups[month].total_job_cards++;
+        groups[month].total_billed += c.net_amount;
+        groups[month].total_collected += c.paid_amount;
+      });
+      const data = Object.values(groups).sort((a, b) => b.month.localeCompare(a.month));
+
+      let csv = 'Month,Total Job Cards,Total Billed (INR),Total Collected (INR),Pending Balance (INR)\n';
+      data.forEach(m => {
+        csv += `"${m.month}",${m.total_job_cards},${m.total_billed},${m.total_collected},${m.total_billed - m.total_collected}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `monthly_financial_report_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function loadPaymentReport() {
+      const monthSelect = document.getElementById('payFilterMonth');
+      const modeFilter = document.getElementById('payFilterMode').value;
+      const allPayments = getAllPaymentsFlat();
+
+      const months = Array.from(new Set(allPayments.map(p => (p.payment_date || '').slice(0, 7)).filter(Boolean))).sort().reverse();
+      const prevSelection = monthSelect.value || 'All';
+      monthSelect.innerHTML = '<option value="All">All Months</option>' + months.map(m => `<option value="${m}">${m}</option>`).join('');
+      monthSelect.value = months.includes(prevSelection) ? prevSelection : 'All';
+      const monthFilter = monthSelect.value;
+
+      const filtered = allPayments.filter(p => {
+        if (monthFilter !== 'All' && (p.payment_date || '').slice(0, 7) !== monthFilter) return false;
+        if (modeFilter !== 'All' && p.payment_mode !== modeFilter) return false;
+        return true;
+      });
+
+      const modeTotals = { 'UPI': 0, 'Cash': 0, 'Bank Transfer': 0, 'Cheque': 0, 'Credit Card': 0 };
+      let grandTotal = 0;
+      filtered.forEach(p => {
+        if (modeTotals[p.payment_mode] === undefined) modeTotals[p.payment_mode] = 0;
+        modeTotals[p.payment_mode] += p.amount;
+        grandTotal += p.amount;
+      });
+      document.getElementById('payTotalUPI').innerText = '₹' + modeTotals['UPI'].toLocaleString('en-IN');
+      document.getElementById('payTotalCash').innerText = '₹' + modeTotals['Cash'].toLocaleString('en-IN');
+      document.getElementById('payTotalBank').innerText = '₹' + modeTotals['Bank Transfer'].toLocaleString('en-IN');
+      document.getElementById('payTotalCheque').innerText = '₹' + modeTotals['Cheque'].toLocaleString('en-IN');
+      document.getElementById('payTotalCard').innerText = '₹' + modeTotals['Credit Card'].toLocaleString('en-IN');
+      document.getElementById('payTotalGrand').innerText = '₹' + grandTotal.toLocaleString('en-IN');
+
+      const groups = {};
+      filtered.forEach(p => {
+        const m = (p.payment_date || '').slice(0, 7) || 'Unknown';
+        if (!groups[m]) groups[m] = [];
+        groups[m].push(p);
+      });
+      const groupMonths = Object.keys(groups).sort().reverse();
+
+      window.currentFilteredPayments = filtered; // stored for CSV export
+
+      const tbody = document.getElementById('paymentReportTableBody');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-slate-400">No payments found for the selected filters.</td></tr>`;
+        return;
+      }
+
+      groupMonths.forEach(m => {
+        const rows = groups[m];
+        const monthTotal = rows.reduce((s, p) => s + p.amount, 0);
+
+        const headerTr = document.createElement('tr');
+        headerTr.className = 'bg-indigo-50';
+        headerTr.innerHTML = `<td colspan="6" class="py-2 px-4 font-bold text-indigo-800 text-xs uppercase tracking-wide"><i class="fa-regular fa-calendar mr-1.5"></i>${m} — ${rows.length} Payment(s)</td>`;
+        tbody.appendChild(headerTr);
+
+        rows.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50';
+          tr.innerHTML = `
+            <td class="py-2.5 px-4 font-medium text-slate-800">${p.payment_date}</td>
+            <td class="py-2.5 px-4 text-xs font-semibold text-slate-700">${p.job_card_label}</td>
+            <td class="py-2.5 px-4 text-xs text-slate-600">${p.customer_name} <span class="text-slate-400">(${p.vehicle_no})</span></td>
+            <td class="py-2.5 px-4"><span class="bg-slate-100 px-2 py-0.5 rounded text-xs text-slate-700 font-medium">${p.payment_mode}</span></td>
+            <td class="py-2.5 px-4 text-xs text-slate-600">${p.reference_no || '-'}</td>
+            <td class="py-2.5 px-4 text-right font-bold text-emerald-600">₹${p.amount.toLocaleString('en-IN')}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        const subTr = document.createElement('tr');
+        subTr.className = 'bg-slate-50 border-b-2 border-slate-200';
+        subTr.innerHTML = `<td colspan="5" class="py-2 px-4 text-right text-xs font-bold text-slate-600 uppercase">${m} Total Received:</td><td class="py-2 px-4 text-right font-bold text-slate-900">₹${monthTotal.toLocaleString('en-IN')}</td>`;
+        tbody.appendChild(subTr);
+      });
+    }
+
+    function exportPaymentsCSV() {
+      const payments = window.currentFilteredPayments || getAllPaymentsFlat();
+      if (payments.length === 0) { alert('No payment records to export.'); return; }
+
+      let csv = 'Payment Date,Job Card No,Customer Name,Vehicle No,Payment Mode,Reference / UTR,Amount (INR)\n';
+      payments.forEach(p => {
+        csv += `"${p.payment_date}","${p.job_card_label}","${p.customer_name}","${p.vehicle_no}","${p.payment_mode}","${p.reference_no || ''}",${p.amount}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `datewise_payments_report_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function loadAdvisorPerformance() {
+      const cards = getComputedJobCards();
+      const groups = {};
+      cards.forEach(c => {
+        const name = c.advisor_name && c.advisor_name.trim() ? c.advisor_name.trim() : 'Unassigned';
+        if (!groups[name]) groups[name] = { advisor_name: name, total_job_cards: 0, total_billed: 0, total_collected: 0, pending_balance: 0, paid_count: 0, partial_count: 0, unpaid_count: 0 };
+        const g = groups[name];
+        g.total_job_cards++;
+        g.total_billed += c.net_amount;
+        g.total_collected += c.paid_amount;
+        g.pending_balance += Math.max(c.balance_due, 0);
+        if (c.status === 'Paid') g.paid_count++;
+        else if (c.status === 'Partial') g.partial_count++;
+        else g.unpaid_count++;
+      });
+      const data = Object.values(groups).sort((a, b) => b.total_billed - a.total_billed);
+
+      const tbody = document.getElementById('advisorPerformanceTableBody');
+      tbody.innerHTML = '';
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">No advisor performance records found.</td></tr>`;
+        return;
+      }
+
+      data.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-slate-900"><i class="fa-solid fa-user-tie text-indigo-600 mr-2"></i>${a.advisor_name}</td>
+          <td class="py-3 px-4 text-center font-semibold text-slate-800">${a.total_job_cards}</td>
+          <td class="py-3 px-4 text-right font-bold text-slate-900">₹${a.total_billed.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-right font-bold text-emerald-600">₹${a.total_collected.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-right font-bold text-rose-600">₹${a.pending_balance.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-center text-xs">
+            <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-medium" title="Paid">${a.paid_count} Paid</span>
+            <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-medium ml-1" title="Partial">${a.partial_count} Part</span>
+            <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-medium ml-1" title="Unpaid">${a.unpaid_count} Unpaid</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function applyFilters() {
+      const searchTerm = document.getElementById('globalSearchInput').value;
+      filterAndRenderTable(searchTerm);
+    }
+
+    function filterAndRenderTable(searchQuery = '') {
+      const cardType = document.getElementById('filterCardType').value;
+      const repairTypeFilter = document.getElementById('filterRepairType').value;
+      const status = document.getElementById('filterStatus').value;
+      const fromDate = document.getElementById('filterFromDate').value;
+      const toDate = document.getElementById('filterToDate').value;
+
+      const filtered = allJobCards.filter(jc => {
+        const hasManual = !!(jc.manual_job_card_no && jc.manual_job_card_no.trim());
+        const hasDms = !!(jc.dms_job_card_no && jc.dms_job_card_no.trim());
+
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          const match = (jc.manual_job_card_no || '').toLowerCase().includes(q) ||
+                        (jc.dms_job_card_no || '').toLowerCase().includes(q) ||
+                        (jc.repair_type || '').toLowerCase().includes(q) ||
+                        jc.customer_name.toLowerCase().includes(q) ||
+                        jc.mobile.toLowerCase().includes(q) ||
+                        jc.vehicle_no.toLowerCase().includes(q) ||
+                        (jc.vehicle_model && jc.vehicle_model.toLowerCase().includes(q)) ||
+                        (jc.advisor_name && jc.advisor_name.toLowerCase().includes(q));
+          if (!match) return false;
+        }
+
+        if (cardType === 'Manual' && !hasManual) return false;
+        if (cardType === 'DMS Software' && !hasDms) return false;
+        if (cardType === 'Both' && !(hasManual && hasDms)) return false;
+        if (repairTypeFilter !== 'All' && jc.repair_type !== repairTypeFilter) return false;
+        if (status !== 'All' && jc.status !== status) return false;
+        if (fromDate && jc.entry_date < fromDate) return false;
+        if (toDate && jc.entry_date > toDate) return false;
+
+        return true;
+      });
+
+      renderTable(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById('globalSearchInput').value = '';
+      document.getElementById('globalSearchInputMobile').value = '';
+      document.getElementById('filterCardType').value = 'All';
+      document.getElementById('filterRepairType').value = 'All';
+      document.getElementById('filterStatus').value = 'All';
+      document.getElementById('filterFromDate').value = '';
+      document.getElementById('filterToDate').value = '';
+      renderTable(allJobCards);
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('jobCardTableBody');
+      const emptyState = document.getElementById('emptyState');
+      const countBadge = document.getElementById('recordCountBadge');
+
+      tbody.innerHTML = '';
+      countBadge.innerText = data.length + ' Records';
+
+      if (data.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      emptyState.classList.add('hidden');
+
+      data.forEach(jc => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition cursor-pointer';
+        tr.onclick = (e) => {
+          if (e.target.closest('button')) return;
+          openDetailModal(jc.id);
+        };
+
+        const paid = jc.paid_amount || 0;
+        const balance = jc.net_amount - paid;
+
+        let statusClass = 'bg-rose-100 text-rose-800 border border-rose-200';
+        if (jc.status === 'Paid') statusClass = 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+        else if (jc.status === 'Partial') statusClass = 'bg-amber-100 text-amber-800 border border-amber-200';
+
+        let typeBadge = '';
+        if (jc.manual_job_card_no && jc.manual_job_card_no.trim()) {
+          typeBadge += `<div class="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200 font-medium inline-block mr-1 mb-1">MAN: ${jc.manual_job_card_no}</div>`;
+        }
+        if (jc.dms_job_card_no && jc.dms_job_card_no.trim()) {
+          typeBadge += `<div class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 font-medium inline-block mb-1">DMS: ${jc.dms_job_card_no}</div>`;
+        }
+        if (!typeBadge) typeBadge = '<span class="text-xs text-slate-400">No number set</span>';
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div>${typeBadge}</div>
+          </td>
+          <td class="py-3 px-4 text-xs font-semibold text-indigo-700">
+            <span class="bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">${jc.repair_type || 'Periodic Service'}</span>
+          </td>
+          <td class="py-3 px-4 text-xs font-medium text-slate-600">${jc.entry_date}</td>
+          <td class="py-3 px-4">
+            <div class="font-semibold text-slate-900">${jc.customer_name}</div>
+            <div class="text-xs text-slate-500">${jc.mobile} | <span class="font-medium text-slate-700">${jc.vehicle_no}</span> ${jc.vehicle_model ? '(' + jc.vehicle_model + ')' : ''}</div>
+          </td>
+          <td class="py-3 px-4 text-xs text-slate-600">${jc.advisor_name || '-'}</td>
+          <td class="py-3 px-4 text-right font-semibold text-slate-900">₹${jc.net_amount.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-right font-medium text-emerald-600">₹${paid.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-right font-medium text-rose-600">₹${balance > 0 ? balance.toLocaleString('en-IN') : '0'}</td>
+          <td class="py-3 px-4 text-center">
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${jc.status}</span>
+          </td>
+          <td class="py-3 px-4 text-center">
+            <div class="flex items-center justify-center space-x-1.5">
+              <button onclick="openDetailModal(${jc.id})" title="View Full Info & Payments" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-lg transition">
+                <i class="fa-solid fa-eye text-xs"></i>
+              </button>
+              <button onclick="editJobCard(${jc.id})" title="Edit Job Card" class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-lg transition">
+                <i class="fa-solid fa-pen text-xs"></i>
+              </button>
+              <button onclick="deleteJobCard(${jc.id})" title="Delete Job Card" class="bg-rose-50 hover:bg-rose-100 text-rose-600 p-2 rounded-lg transition">
+                <i class="fa-solid fa-trash text-xs"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openNewJobCardModal() {
+      document.getElementById('jobCardForm').reset();
+      document.getElementById('editJobCardId').value = '';
+      document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-file-circle-plus text-indigo-400"></i> New Job Card Payment Entry';
+      document.getElementById('entry_date').valueAsDate = new Date();
+      calculateNet();
+      document.getElementById('jobCardModal').classList.remove('hidden');
+    }
+
+    function closeJobCardModal() {
+      document.getElementById('jobCardModal').classList.add('hidden');
+    }
+
+    function calculateNet() {
+      const total = parseFloat(document.getElementById('total_amount').value) || 0;
+      const discount = parseFloat(document.getElementById('discount').value) || 0;
+      const net = total - discount;
+      document.getElementById('previewNet').innerText = '₹' + net.toLocaleString('en-IN', {minimumFractionDigits: 2});
+    }
+
+    function saveJobCard(e) {
+      e.preventDefault();
+      const id = document.getElementById('editJobCardId').value;
+      const manual_no = document.getElementById('manual_job_card_no').value.trim();
+      const dms_no = document.getElementById('dms_job_card_no').value.trim();
+      const repair_type = document.getElementById('repair_type').value;
+      const total_amount = parseFloat(document.getElementById('total_amount').value) || 0;
+      const discount = parseFloat(document.getElementById('discount').value) || 0;
+
+      if (!manual_no && !dms_no) {
+        alert('Kam se kam ek Job Card No. bharo — Manual ya DMS.');
+        return;
+      }
+
+      if (!document.getElementById('customer_name').value.trim() ||
+          !document.getElementById('mobile').value.trim() ||
+          !document.getElementById('vehicle_no').value.trim() ||
+          !document.getElementById('entry_date').value) {
+        alert('Please fill all required (*) fields.');
+        return;
+      }
+
+      const db = getDB();
+
+      const fields = {
+        manual_job_card_no: manual_no,
+        dms_job_card_no: dms_no,
+        repair_type: repair_type,
+        entry_date: document.getElementById('entry_date').value,
+        customer_name: document.getElementById('customer_name').value.trim(),
+        mobile: document.getElementById('mobile').value.trim(),
+        vehicle_no: document.getElementById('vehicle_no').value.trim().toUpperCase(),
+        vehicle_model: document.getElementById('vehicle_model').value.trim(),
+        advisor_name: document.getElementById('advisor_name').value.trim(),
+        total_amount: total_amount,
+        discount: discount,
+        net_amount: total_amount - discount,
+        remarks: document.getElementById('remarks').value.trim()
+      };
+
+      if (id) {
+        const idx = db.jobcards.findIndex(j => String(j.id) === String(id));
+        if (idx === -1) { alert('Job card not found.'); return; }
+        db.jobcards[idx] = Object.assign({}, db.jobcards[idx], fields);
+      } else {
+        const newCard = Object.assign({
+          id: db.next_id++,
+          payments: [],
+          created_at: new Date().toISOString()
+        }, fields);
+        db.jobcards.push(newCard);
+      }
+
+      saveDB(db);
+      closeJobCardModal();
+      loadAllData();
+    }
+
+    function editJobCard(id) {
+      const db = getDB();
+      const jc = db.jobcards.find(j => String(j.id) === String(id));
+      if (!jc) { alert('Job card not found.'); return; }
+
+      document.getElementById('editJobCardId').value = jc.id;
+      document.getElementById('manual_job_card_no').value = jc.manual_job_card_no || '';
+      document.getElementById('dms_job_card_no').value = jc.dms_job_card_no || '';
+      document.getElementById('repair_type').value = jc.repair_type || 'Periodic Service';
+      document.getElementById('entry_date').value = jc.entry_date;
+      document.getElementById('customer_name').value = jc.customer_name;
+      document.getElementById('mobile').value = jc.mobile;
+      document.getElementById('vehicle_no').value = jc.vehicle_no;
+      document.getElementById('vehicle_model').value = jc.vehicle_model || '';
+      document.getElementById('advisor_name').value = jc.advisor_name || '';
+      document.getElementById('total_amount').value = jc.total_amount;
+      document.getElementById('discount').value = jc.discount || 0;
+      document.getElementById('remarks').value = jc.remarks || '';
+
+      calculateNet();
+      document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-indigo-400"></i> Edit Job Card Entry';
+      document.getElementById('jobCardModal').classList.remove('hidden');
+    }
+
+    function deleteJobCard(id) {
+      if (!confirm('Are you sure you want to delete this Job Card and all associated payment records?')) return;
+      const db = getDB();
+      db.jobcards = db.jobcards.filter(j => String(j.id) !== String(id));
+      saveDB(db);
+      loadAllData();
+    }
+
+    function openDetailModal(id) {
+      currentSelectedJobCardId = id;
+      {
+        const db = getDB();
+        const raw = db.jobcards.find(j => String(j.id) === String(id));
+        if (!raw) { alert('Job card not found.'); return; }
+        const jc = computeJobCard(raw);
+
+        document.getElementById('detJobCardNo').innerText = jc.manual_job_card_no || jc.dms_job_card_no || 'No Number';
+        document.getElementById('detCardType').innerText = `Manual: ${jc.manual_job_card_no || '-'}  |  DMS: ${jc.dms_job_card_no || '-'}`;
+        document.getElementById('detCustomerName').innerText = jc.customer_name;
+        document.getElementById('detMobile').innerText = jc.mobile;
+        document.getElementById('detVehicleNo').innerText = jc.vehicle_no;
+        document.getElementById('detVehicleModel').innerText = jc.vehicle_model || 'No model specified';
+        document.getElementById('detNetAmt').innerText = '₹' + jc.net_amount.toLocaleString('en-IN');
+        document.getElementById('detPaidAmt').innerText = '₹' + jc.total_paid.toLocaleString('en-IN');
+        document.getElementById('detBalanceAmt').innerText = '₹' + jc.balance_due.toLocaleString('en-IN');
+        document.getElementById('detRepairType').innerText = jc.repair_type || 'Periodic Service';
+        document.getElementById('detEntryDate').innerText = jc.entry_date;
+        document.getElementById('detAdvisor').innerText = jc.advisor_name || 'N/A';
+        document.getElementById('detRemarks').innerText = jc.remarks || 'No remarks added.';
+        document.getElementById('payJobCardId').value = jc.id;
+
+        const badge = document.getElementById('detStatusBadge');
+        badge.innerText = jc.status;
+        if (jc.status === 'Paid') {
+          badge.className = 'inline-block mt-1 text-xs px-2.5 py-0.5 rounded font-medium bg-emerald-100 text-emerald-800 border border-emerald-200';
+        } else if (jc.status === 'Partial') {
+          badge.className = 'inline-block mt-1 text-xs px-2.5 py-0.5 rounded font-medium bg-amber-100 text-amber-800 border border-amber-200';
+        } else {
+          badge.className = 'inline-block mt-1 text-xs px-2.5 py-0.5 rounded font-medium bg-rose-100 text-rose-800 border border-rose-200';
+        }
+
+        const pTbody = document.getElementById('paymentHistoryTableBody');
+        pTbody.innerHTML = '';
+        if (jc.payments.length === 0) {
+          pTbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400">No payment records found for this job card. Click "Add Payment" above.</td></tr>`;
+        } else {
+          jc.payments.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+              <td class="py-2.5 px-3 font-medium text-slate-800">${p.payment_date}</td>
+              <td class="py-2.5 px-3"><span class="bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-medium">${p.payment_mode}</span></td>
+              <td class="py-2.5 px-3 text-slate-600">${p.reference_no || '-'}</td>
+              <td class="py-2.5 px-3 text-slate-600">${p.notes || '-'}</td>
+              <td class="py-2.5 px-3 text-right font-bold text-emerald-600">₹${p.amount.toLocaleString('en-IN')}</td>
+              <td class="py-2.5 px-3 text-center">
+                <button onclick="deletePayment(${p.id})" class="text-rose-500 hover:text-rose-700 p-1" title="Delete Payment">
+                  <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+              </td>
+            `;
+            pTbody.appendChild(tr);
+          });
+        }
+
+        document.getElementById('paymentFormContainer').classList.add('hidden');
+        document.getElementById('detailModal').classList.remove('hidden');
+      }
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.add('hidden');
+      loadAllData();
+    }
+
+    function togglePaymentForm() {
+      const container = document.getElementById('paymentFormContainer');
+      container.classList.toggle('hidden');
+      document.getElementById('pay_date').valueAsDate = new Date();
+    }
+
+    function submitPayment(e) {
+      e.preventDefault();
+      const jobCardId = document.getElementById('payJobCardId').value;
+      const amount = parseFloat(document.getElementById('pay_amount').value) || 0;
+      if (amount <= 0) { alert('Please enter a valid payment amount.'); return; }
+
+      const db = getDB();
+      const idx = db.jobcards.findIndex(j => String(j.id) === String(jobCardId));
+      if (idx === -1) { alert('Job card not found.'); return; }
+
+      const payment = {
+        id: db.next_payment_id++,
+        payment_date: document.getElementById('pay_date').value,
+        amount: amount,
+        payment_mode: document.getElementById('pay_mode').value,
+        reference_no: document.getElementById('pay_ref').value.trim(),
+        notes: 'Payment recorded via portal'
+      };
+      if (!db.jobcards[idx].payments) db.jobcards[idx].payments = [];
+      db.jobcards[idx].payments.push(payment);
+      saveDB(db);
+
+      document.getElementById('paymentEntryForm').reset();
+      document.getElementById('paymentFormContainer').classList.add('hidden');
+      openDetailModal(jobCardId);
+    }
+
+    function deletePayment(paymentId) {
+      if (!confirm('Are you sure you want to delete this payment entry?')) return;
+      const db = getDB();
+      const idx = db.jobcards.findIndex(j => String(j.id) === String(currentSelectedJobCardId));
+      if (idx === -1) { alert('Job card not found.'); return; }
+      db.jobcards[idx].payments = (db.jobcards[idx].payments || []).filter(p => String(p.id) !== String(paymentId));
+      saveDB(db);
+      openDetailModal(currentSelectedJobCardId);
+    }
+
+    function exportDataJSON() {
+      const db = getDB();
+      const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `jobcards_backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importDataJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        try {
+          const json = JSON.parse(event.target.result);
+          if (!json || !Array.isArray(json.jobcards)) {
+            alert('Invalid backup file format!');
+            return;
+          }
+          if (!confirm('Restoring from backup will replace current data. Are you sure?')) return;
+
+          if (!json.settings) json.settings = { workshop_name: 'Mukesh Auto Workshop & Service Center', authorized_by: 'Mukesh', workshop_address: '', workshop_phone: '', tax_rate: '18', currency: '₹' };
+          if (!json.next_id) json.next_id = Math.max(1, ...json.jobcards.map(j => (j.id || 0) + 1));
+          if (!json.next_payment_id) {
+            const allPayIds = json.jobcards.flatMap(j => (j.payments || []).map(p => p.id || 0));
+            json.next_payment_id = Math.max(1, ...allPayIds.map(x => x + 1));
+          }
+
+          saveDB(json);
+          alert('Database restored successfully!');
+          loadSettings();
+          loadAllData();
+        } catch (err) {
+          alert('Invalid JSON file format!');
+          console.error(err);
+        }
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function resetAllData() {
+      if (!confirm('DANGER ZONE: Are you sure you want to delete ALL job cards and payment entries? This action cannot be undone!')) return;
+      if (!confirm('Please confirm again that you want to wipe all records.')) return;
+
+      localStorage.removeItem(DB_KEY);
+      getDB();
+      alert('All records cleared successfully.');
+      loadAllData();
+    }
+  </script>
+</body>
+</html>
